@@ -127,6 +127,16 @@ export default function Dashboard() {
                                 <TrendingUp size={20} />
                                 <span>Estatísticas</span>
                             </button>
+
+                            {session?.user?.email === 'heitorbdelfino@gmail.com' && (
+                                <button
+                                    onClick={() => router.push('/admin')}
+                                    className={`${styles.navButton} ${styles.navButtonAdmin}`}
+                                >
+                                    <Settings size={20} />
+                                    <span>Admin Panel</span>
+                                </button>
+                            )}
                         </nav>
 
                         <div className={styles.planInfo}>

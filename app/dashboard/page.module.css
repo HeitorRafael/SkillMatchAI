@@ -130,6 +130,15 @@
     color: var(--white);
 }
 
+.navButtonAdmin {
+    background: var(--blue-600); /* Cor diferente para o botão de admin */
+    color: var(--white);
+}
+
+.navButtonAdmin:hover {
+    background: var(--blue-700);
+}
+
 .planInfo {
     margin-top: 2rem;
     padding: 1rem;
