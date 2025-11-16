@@ -33,7 +33,15 @@ export const authOptions: AuthOptions = {
         }
 
         console.log('DEBUG: Comparing password for user', user.email);
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        if (!user.password) {
+          console.log("DEBUG: User has no password stored");
+          throw new Error("Invalid credentials");
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
 
         if (!isPasswordValid) {
           console.log('DEBUG: Authorize failed: Invalid password');
