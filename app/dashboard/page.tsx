@@ -8,6 +8,14 @@ import { useRouter } from 'next/navigation';
 
 type Section = 'upload' | 'profile' | 'api';
 
+interface AnalysisResult {
+    success: boolean;
+    profile: any;
+    jobs: any[];
+    searchUrl: string;
+    timestamp: string;
+}
+
 export default function Dashboard() {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -17,6 +25,7 @@ export default function Dashboard() {
     const [description, setDescription] = useState('');
     const [apiKey, setApiKey] = useState('');
     const [analyzing, setAnalyzing] = useState(false);
+    const [error, setError] = useState<string>('');
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -32,21 +41,65 @@ export default function Dashboard() {
         const file = e.target.files?.[0];
         if (file && file.type === 'application/pdf') {
             setResumeFile(file);
+            setError(''); // Limpa o erro ao selecionar um novo arquivo
         } else {
             alert('Por favor, selecione um arquivo PDF');
+            setError('Por favor, selecione um arquivo PDF válido.');
         }
     };
 
-    const handleAnalysis = () => {
-        if (!resumeFile || !description || !apiKey) {
-            alert('Por favor, preencha todos os campos');
+    const handleAnalysis = async () => {
+        // Validações
+        if (!resumeFile) {
+            setError('Por favor, faça upload do seu currículo em PDF');
             return;
         }
+
+        if (!description || description.trim().length < 50) {
+            setError('Por favor, descreva seu perfil com pelo menos 50 caracteres');
+            return;
+        }
+
+        if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+            setError('Por favor, insira uma chave de API válida da Anthropic');
+            return;
+        }
+
         setAnalyzing(true);
-        setTimeout(() => {
+        setError('');
+
+        try {
+            // Criar FormData
+            const formData = new FormData();
+            formData.append('resume', resumeFile);
+            formData.append('description', description);
+            formData.append('apiKey', apiKey);
+
+            // Chamar API de análise
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao analisar');
+            }
+
+            // Salvar resultado no localStorage
+            localStorage.setItem('analysis_result', JSON.stringify(data));
+            localStorage.setItem('user_profile', JSON.stringify(data.profile));
+
+            // Redirecionar para página de vagas
+            router.push('/jobs');
+
+        } catch (err: any) {
+            console.error('Erro na análise:', err);
+            setError(err.message || 'Erro ao processar análise. Verifique sua API key e tente novamente.');
+        } finally {
             setAnalyzing(false);
-            alert('Análise iniciada! Você será redirecionado para a página de vagas.');
-        }, 2000);
+        }
     };
 
     const handleProfileSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -118,12 +171,18 @@ export default function Dashboard() {
                                 <span>Chave API</span>
                             </button>
 
-                            <button className={styles.navButton}>
+                            <button
+                                onClick={() => router.push('/jobs')}
+                                className={styles.navButton}
+                            >
                                 <FileText size={20} />
                                 <span>Minhas Vagas</span>
                             </button>
 
-                            <button className={styles.navButton}>
+                            <button
+                                onClick={() => router.push('/statistics')}
+                                className={styles.navButton}
+                            >
                                 <TrendingUp size={20} />
                                 <span>Estatísticas</span>
                             </button>
@@ -178,6 +237,25 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
+                            {/* Error Message */}
+                            {error && (
+                                <div style={{
+                                    background: '#fee2e2',
+                                    border: '1px solid #fecaca',
+                                    borderRadius: '0.5rem',
+                                    padding: '1rem',
+                                    marginBottom: '1.5rem',
+                                    display: 'flex',
+                                    gap: '0.75rem',
+                                    alignItems: 'flex-start'
+                                }}>
+                                    <AlertCircle size={20} style={{ color: '#dc2626', flexShrink: 0, marginTop: '0.125rem' }} />
+                                    <div style={{ fontSize: '0.875rem', color: '#991b1b' }}>
+                                        <strong>Erro:</strong> {error}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Upload Card */}
                             <div className={styles.card}>
                                 <div className={styles.cardHeader}>
@@ -197,8 +275,10 @@ export default function Dashboard() {
                                         onChange={handleFileChange}
                                         className={styles.fileInput}
                                         id="resume-upload"
+                                        disabled={analyzing}
                                     />
-                                    <label htmlFor="resume-upload" style={{ cursor: 'pointer' }}>
+                                    <label htmlFor="resume-upload" style={{ cursor: analyzing ? 'not-allowed' : 'pointer' }}>
+                                        <Upload size={48} className={styles.uploadIcon} /> {/* Adicionado ícone de upload */}
                                         {resumeFile ? (
                                             <div>
                                                 <p className={styles.uploadText}>{resumeFile.name}</p>
@@ -234,6 +314,7 @@ export default function Dashboard() {
                                     placeholder="Exemplo: Sou desenvolvedor Full Stack com 5 anos de experiência em React, Node.js e TypeScript. Tenho forte interesse em arquitetura de software e liderança técnica. Busco oportunidades em empresas de tecnologia que valorizem inovação e crescimento profissional..."
                                     className={styles.textarea}
                                     maxLength={1000}
+                                    disabled={analyzing}
                                 />
                                 <p className={styles.charCount}>{description.length}/1000 caracteres</p>
                             </div>
@@ -252,9 +333,9 @@ export default function Dashboard() {
 
                                 <div className={`${styles.alert} ${styles.alertYellow}`}>
                                     <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconYellow}`} />
-                                    <div className={`${styles.alertText} ${styles.alertTextYellow}`}>
-                                        <strong>Importante:</strong> Sua chave API é criptografada com AES-256 e nunca é compartilhada.
-                                        Você pode removê-la ou alterá-la a qualquer momento nas configurações.
+                                    <div style={{ fontSize: '0.875rem', color: '#92400e' }}>
+                                        <strong>Importante:</strong> Sua chave API da Anthropic é necessária para análise com IA.
+                                        Ela é processada de forma segura e nunca armazenada em nossos servidores.
                                     </div>
                                 </div>
 
@@ -264,11 +345,12 @@ export default function Dashboard() {
                                     onChange={(e) => setApiKey(e.target.value)}
                                     placeholder="sk-ant-api03-xxxxxxxxxxxxxxxxxxxx"
                                     className={styles.input}
+                                    disabled={analyzing}
                                 />
                                 <p className={styles.inputHint}>
                                     Não tem uma chave?{' '}
                                     <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className={styles.link}>
-                                        Obtenha aqui
+                                        Obtenha aqui gratuitamente
                                     </a>
                                 </p>
                             </div>
@@ -282,7 +364,7 @@ export default function Dashboard() {
                                 {analyzing ? (
                                     <>
                                         <div className={styles.spinner}></div>
-                                        Analisando...
+                                        Analisando seu perfil...
                                     </>
                                 ) : (
                                     <>
@@ -291,7 +373,9 @@ export default function Dashboard() {
                                     </>
                                 )}
                             </button>
-                            <p className={styles.buttonFooter}>A análise leva em média 30-60 segundos</p>
+                            <p className={styles.buttonFooter}>
+                                {analyzing ? 'Isso pode levar 30-60 segundos. Por favor, aguarde...' : 'A análise leva em média 30-60 segundos'}
+                            </p>
                         </div>
                     )}
 
@@ -356,9 +440,9 @@ export default function Dashboard() {
                             <div className={styles.card}>
                                 <div className={`${styles.alert} ${styles.alertBlue}`}>
                                     <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconBlue}`} />
-                                    <div className={`${styles.alertText} ${styles.alertTextBlue}`}>
-                                        <strong>Segurança:</strong> Sua chave é criptografada usando AES-256-GCM antes de ser armazenada.
-                                        Nós nunca temos acesso à chave descriptografada.
+                                    <div style={{ fontSize: '0.875rem', color: '#1e40af' }}>
+                                        <strong>Segurança:</strong> Sua chave nunca é armazenada em nossos servidores.
+                                        Ela é usada apenas durante a análise e descartada em seguida.
                                     </div>
                                 </div>
 
@@ -392,7 +476,7 @@ export default function Dashboard() {
                                                 console.anthropic.com
                                             </a>
                                         </li>
-                                        <li>Faça login ou crie uma conta</li>
+                                        <li>Faça login ou crie uma conta (é gratuito)</li>
                                         <li>Vá em &quot;API Keys&quot; e gere uma nova chave</li>
                                         <li>Copie e cole aqui</li>
                                     </ol>
