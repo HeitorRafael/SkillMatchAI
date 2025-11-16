@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkillMatchAI ✨
 
-## Getting Started
+**Encontre a vaga perfeita para o seu perfil com o poder da Inteligência Artificial.**
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 O que é o SkillMatchAI?
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Cansado de enviar currículos para dezenas de vagas e não ter retorno? O SkillMatchAI é uma plataforma inovadora que usa Inteligência Artificial para conectar você às oportunidades de emprego que realmente combinam com suas habilidades e experiência.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Nós vamos além da simples correspondência de palavras-chave. Nossa tecnologia analisa o seu currículo e perfil para entender suas competências, sugerindo as vagas onde você tem a maior chance de sucesso.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤖 Como Funciona?
 
-## Learn More
+É simples, rápido e eficiente. Siga os passos abaixo e deixe nossa IA trabalhar por você:
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Faça seu Cadastro:** Crie sua conta em poucos minutos.
+2.  **Envie seu Currículo:** Faça o upload do seu currículo mais recente e, se quiser, adicione uma breve descrição sobre seus objetivos profissionais.
+3.  **Análise Inteligente:** Nossa IA processará suas informações, identificando suas principais habilidades e qualificações.
+4.  **Receba Vagas Sob Medida:** Explore uma lista de vagas de emprego com alta compatibilidade com o seu perfil, incluindo uma pontuação que indica o quão bem você se encaixa em cada oportunidade.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⭐ Recursos Principais
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+-   **Análise de Currículo por IA:** Entenda suas forças e como o mercado de trabalho vê seu perfil.
+-   **Pontuação de Compatibilidade:** Veja instantaneamente o seu "match" com cada vaga, de 0 a 100.
+-   **Recomendações Personalizadas:** Descubra oportunidades que talvez você não encontrasse em buscas tradicionais.
+-   **Gerenciamento Simplificado:** Salve as vagas que te interessam e acompanhe seu processo seletivo.
 
-## Deploy on Vercel
+## 🌐 Acesse Agora!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pronto para dar o próximo passo na sua carreira?
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**[Acesse o SkillMatchAI](https://skillmatch-ai.vercel.app/)** - (Link de demonstração)
+
+---
+
+*Este projeto está em desenvolvimento contínuo. Novas funcionalidades serão adicionadas em breve!*
