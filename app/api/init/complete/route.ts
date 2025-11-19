@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
 const ADMIN_EMAIL = 'heitorbdelfino@gmail.com';
-const ADMIN_PASSWORD = 'Senha123';
+const ADMIN_PASSWORD = 'senha123';
 const ADMIN_NAME = 'Heitor Delfino';
 
 /**
