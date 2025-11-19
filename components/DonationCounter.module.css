@@ -6,6 +6,7 @@
     border-radius: 0.75rem;
     border-left: 4px solid #ef4444;
     overflow: hidden;
+    position: relative;
 }
 
 .donationSection::before {
