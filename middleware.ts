@@ -31,7 +31,12 @@ function checkRateLimit(ip: string, maxRequests: number = 100, windowMs: number 
 }
 
 export function middleware(request: NextRequest) {
-    // Validar variáveis de ambiente críticas
+    // Pular validação durante build time
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+        return NextResponse.next();
+    }
+
+    // Validar variáveis de ambiente críticas apenas em runtime
     const requiredEnvVars = [
         'NEXTAUTH_SECRET',
         'NEXTAUTH_URL',

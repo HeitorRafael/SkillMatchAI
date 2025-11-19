@@ -1,9 +1,15 @@
 /**
  * Validação de variáveis de ambiente obrigatórias
- * Executa no servidor no startup
+ * Executa no servidor no runtime (não no build)
  */
 
 export function validateEnvironmentVariables() {
+  // Apenas validar em runtime, não em build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    console.log('ℹ️  Skipping env validation during build phase');
+    return;
+  }
+
   const requiredVars = [
     'NEXTAUTH_SECRET',
     'NEXTAUTH_URL',
@@ -49,6 +55,11 @@ export function validateEnvironmentVariables() {
  * Log de variáveis (sem expor valores sensíveis)
  */
 export function logEnvironmentStatus() {
+  // Apenas validar em runtime, não em build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return;
+  }
+
   if (process.env.NODE_ENV !== 'development') return;
 
   console.log('\n📋 Status de Variáveis de Ambiente:');

@@ -3,11 +3,9 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import prisma from '@/lib/prisma';
 import * as bcrypt from 'bcrypt';
-import { validateEnvironmentVariables, logEnvironmentStatus } from '@/lib/env-validation';
 
-// Validar variáveis de ambiente no startup
-validateEnvironmentVariables();
-logEnvironmentStatus();
+// Nota: Validações de ambiente são feitas no middleware.ts
+// durante runtime, não em tempo de build
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
