@@ -5,6 +5,7 @@ import { Upload, User, Key, Sparkles, LogOut, Settings, FileText, TrendingUp, Al
 import styles from './page.module.css';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import SubscriptionModal from '@/components/SubscriptionModal';
 
 type Section = 'upload' | 'profile' | 'api';
 
@@ -26,6 +27,11 @@ export default function Dashboard() {
     const [apiKey, setApiKey] = useState('');
     const [analyzing, setAnalyzing] = useState(false);
     const [error, setError] = useState<string>('');
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const [examplePixKey] = useState(() => 
+        // Gerar chave PIX aleatória para exemplo
+        `SkillMatch${Math.random().toString(36).substring(2, 15)}@pix`
+    );
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -189,7 +195,33 @@ export default function Dashboard() {
                             <p className={styles.planLabel}>Plano Atual</p>
                             <p className={styles.planName}>Gratuito</p>
                             <p className={styles.planUsage}>1/1 análise esta semana</p>
-                            <button className={styles.upgradeButton}>Fazer Upgrade</button>
+                            <button 
+                                onClick={() => setShowSubscriptionModal(true)}
+                                className={styles.upgradeButton}
+                            >
+                                Fazer Upgrade
+                            </button>
+                            
+                            {/* Example PIX Key */}
+                            <div style={{
+                                marginTop: '1.5rem',
+                                paddingTop: '1.5rem',
+                                borderTop: '1px solid var(--gray-200)'
+                            }}>
+                                <p className={styles.planLabel}>Exemplo PIX</p>
+                                <div style={{
+                                    background: 'var(--gray-100)',
+                                    padding: '0.75rem',
+                                    borderRadius: '0.5rem',
+                                    fontSize: '0.75rem',
+                                    fontFamily: 'monospace',
+                                    wordBreak: 'break-all',
+                                    color: 'var(--gray-700)',
+                                    marginTop: '0.5rem'
+                                }}>
+                                    {examplePixKey}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -473,6 +505,12 @@ export default function Dashboard() {
                     )}
                 </main>
             </div>
+
+            {/* Subscription Modal */}
+            <SubscriptionModal 
+                isOpen={showSubscriptionModal}
+                onClose={() => setShowSubscriptionModal(false)}
+            />
         </div>
     );
 }
