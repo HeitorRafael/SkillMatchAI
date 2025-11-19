@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Sparkles, ArrowLeft, Settings, LogOut, Search, SlidersHorizontal,
@@ -138,11 +138,107 @@ export default function JobsPage() {
     const [remoteType, setRemoteType] = useState<RemoteType>('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [minScore, setMinScore] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadedCards, setLoadedCards] = useState<number[]>([]);
+    const [jobs, setJobs] = useState<any[]>([]);
+    const [error, setError] = useState<string>('');
 
-    const filteredJobs = mockJobs.filter(job => {
+    // Carregar dados da análise quando a página monta
+    useEffect(() => {
+        const loadJobsData = async () => {
+            setIsLoading(true);
+            setLoadedCards([]);
+            
+            try {
+                // Verificar se há dados em localStorage
+                const resumeData = localStorage.getItem('resumeData');
+                const analysisInProgress = localStorage.getItem('analysisInProgress');
+
+                if (!resumeData || !analysisInProgress) {
+                    // Se não há dados, usar dados mockados
+                    setJobs(mockJobs);
+                    simulateProgressiveLoading(mockJobs.length);
+                    return;
+                }
+
+                const { description, apiKey } = JSON.parse(resumeData);
+
+                // Chamar a API para análise completa
+                const response = await fetch('/api/jobs/analyze-and-search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        resumeText: description, // Temporário - idealmente seria o texto extraído do PDF
+                        userProfile: { description },
+                        apiKey
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao buscar vagas');
+                }
+
+                const data = await response.json();
+                
+                // Salvar no localStorage
+                localStorage.setItem('analysis_result', JSON.stringify(data));
+                localStorage.setItem('user_profile', JSON.stringify(data.profile));
+                localStorage.removeItem('analysisInProgress');
+                localStorage.removeItem('resumeData');
+
+                // Usar os jobs da API
+                setJobs(data.jobs || mockJobs);
+                simulateProgressiveLoading(data.jobs?.length || mockJobs.length);
+
+            } catch (err: any) {
+                console.error('Erro:', err);
+                setError(err.message);
+                // Em caso de erro, usar dados mockados
+                setJobs(mockJobs);
+                simulateProgressiveLoading(mockJobs.length);
+            }
+        };
+
+        loadJobsData();
+    }, []);
+
+    const simulateProgressiveLoading = (jobCount: number) => {
+        // Carregar 2 cards por vez
+        const cardIndices = Array.from({ length: jobCount }, (_, i) => i);
+        let loaded: number[] = [];
+
+        // Primeira leva (2 cards)
+        setTimeout(() => {
+            loaded = cardIndices.slice(0, Math.min(2, jobCount));
+            setLoadedCards([...loaded]);
+        }, 300);
+
+        // Segunda leva (próximos 2 cards)
+        if (jobCount > 2) {
+            setTimeout(() => {
+                loaded = cardIndices.slice(0, Math.min(4, jobCount));
+                setLoadedCards([...loaded]);
+            }, 900);
+        }
+
+        // Terceira leva (restante)
+        if (jobCount > 4) {
+            setTimeout(() => {
+                setLoadedCards(cardIndices);
+                setIsLoading(false);
+            }, 1500);
+        } else {
+            setTimeout(() => {
+                setLoadedCards(cardIndices);
+                setIsLoading(false);
+            }, 1200);
+        }
+    };
+
+    const filteredJobs = jobs.filter(job => {
         const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+            job.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const matchesFilter = filterType === 'all' || job.matchType === filterType;
         const matchesRemote = remoteType === 'all' || job.remote === remoteType;
@@ -316,7 +412,7 @@ export default function JobsPage() {
 
                 {/* Main Content */}
                 <main className={styles.main}>
-                    <div className={styles.mainContent}>
+                    <div className={`${styles.mainContent} ${isLoading ? styles.blurred : ''}`}>
                         {/* Header */}
                         <div className={styles.header}>
                             <div className={styles.headerTop}>
@@ -348,8 +444,9 @@ export default function JobsPage() {
                         {/* Jobs List */}
                         {filteredJobs.length > 0 ? (
                             <div className={styles.jobsList}>
-                                {filteredJobs.map((job) => (
-                                    <div key={job.id} className={styles.jobCard}>
+                                {filteredJobs.map((job: any, index: number) => (
+                                    loadedCards.includes(index) && (
+                                        <div key={job.id} className={`${styles.jobCard} ${styles.cardLoaded}`}>
                                         <div className={styles.jobHeader}>
                                             <div className={styles.jobInfo}>
                                                 <div className={styles.jobCompany}>
@@ -388,7 +485,7 @@ export default function JobsPage() {
                                         <p className={styles.jobDescription}>{job.description}</p>
 
                                         <div className={styles.jobTags}>
-                                            {job.tags.map((tag, index) => (
+                                            {job.tags.map((tag: string, index: number) => (
                                                 <span key={index} className={styles.tag}>{tag}</span>
                                             ))}
                                             <span className={`${styles.tag} ${job.remote === 'remote' ? styles.tagRemote :
@@ -405,7 +502,7 @@ export default function JobsPage() {
                                                 Insights da IA
                                             </div>
                                             <div className={styles.insightsList}>
-                                                {job.insights.map((insight, index) => (
+                                                {job.insights.map((insight: string, index: number) => (
                                                     <div key={index} className={styles.insightItem}>
                                                         {index === 0 && <CheckCircle size={14} className={styles.insightIcon} style={{ color: '#10b981' }} />}
                                                         {index === 1 && <TrendingUp size={14} className={styles.insightIcon} style={{ color: '#3b82f6' }} />}
@@ -433,7 +530,8 @@ export default function JobsPage() {
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>
+                                        </div>
+                                    )
                                 ))}
                             </div>
                         ) : (
@@ -452,6 +550,23 @@ export default function JobsPage() {
                     </div>
                 </main>
             </div>
+
+            {/* Modal de Carregamento */}
+            {isLoading && (
+                <div className={styles.loadingModal}>
+                    <div className={styles.loadingOverlay}></div>
+                    <div className={styles.loadingContent}>
+                        <div className={styles.loadingContainer}>
+                            <div className={styles.loadingSpinner}></div>
+                            <h2 className={styles.loadingTitle}>Carregando suas vagas</h2>
+                            <p className={styles.loadingSubtitle}>Preparando as melhores oportunidades para você...</p>
+                            <div className={styles.loadingBar}>
+                                <div className={styles.loadingFill}></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

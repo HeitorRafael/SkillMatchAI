@@ -74,23 +74,14 @@ export default function Dashboard() {
             formData.append('description', description);
             formData.append('apiKey', apiKey);
 
-            // Chamar API de análise
-            const response = await fetch('/api/auth/analyze', {
-                method: 'POST',
-                body: formData
-            });
+            // Salvar dados na sessão/localStorage para serem processados na página de jobs
+            localStorage.setItem('resumeData', JSON.stringify({
+                description,
+                apiKey
+            }));
+            localStorage.setItem('analysisInProgress', 'true');
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Erro ao analisar');
-            }
-
-            // Salvar resultado no localStorage
-            localStorage.setItem('analysis_result', JSON.stringify(data));
-            localStorage.setItem('user_profile', JSON.stringify(data.profile));
-
-            // Redirecionar para página de vagas
+            // Redirecionar imediatamente para jobs
             router.push('/jobs');
 
         } catch (err: any) {
