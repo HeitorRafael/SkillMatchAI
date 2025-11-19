@@ -25,25 +25,23 @@ export function validateEmail(email: string): boolean {
 export function validatePassword(password: string): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (password.length < 8) {
-        errors.push('Senha deve ter pelo menos 8 caracteres');
+    // Requisitos mínimos (mais amigável)
+    if (password.length < 6) {
+        errors.push('Senha deve ter pelo menos 6 caracteres');
     }
 
-    if (!/[A-Z]/.test(password)) {
-        errors.push('Senha deve conter pelo menos uma letra maiúscula');
-    }
+    // Recomendado (mas não obrigatório para melhor UX)
+    // if (!/[A-Z]/.test(password)) {
+    //     errors.push('Recomendado: incluir letra maiúscula');
+    // }
 
-    if (!/[a-z]/.test(password)) {
-        errors.push('Senha deve conter pelo menos uma letra minúscula');
-    }
+    // if (!/[a-z]/.test(password)) {
+    //     errors.push('Recomendado: incluir letra minúscula');
+    // }
 
-    if (!/[0-9]/.test(password)) {
-        errors.push('Senha deve conter pelo menos um número');
-    }
-
-    if (!/[^A-Za-z0-9]/.test(password)) {
-        errors.push('Senha deve conter pelo menos um caractere especial');
-    }
+    // if (!/[0-9]/.test(password)) {
+    //     errors.push('Recomendado: incluir número');
+    // }
 
     return {
         valid: errors.length === 0,

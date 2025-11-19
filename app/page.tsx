@@ -54,7 +54,7 @@ export default function LandingPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.message || 'Erro ao cadastrar. Tente novamente.');
+        setError(data.error || data.message || 'Erro ao cadastrar. Tente novamente.');
         setLoading(false);
         return;
       }
@@ -64,15 +64,17 @@ export default function LandingPage() {
         redirect: false,
         email,
         password,
+        rememberMe: false,
       });
 
       if (result?.error) {
-        setError('Cadastro realizado, mas não foi possível fazer login automaticamente.');
+        setError('Cadastro realizado, mas não foi possível fazer login automaticamente. Tente fazer login manualmente.');
       } else {
         setIsModalOpen(false);
         router.push('/dashboard');
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Erro no cadastro:', err);
       setError('Ocorreu um erro inesperado. Tente novamente.');
     }
     setLoading(false);
@@ -211,7 +213,7 @@ export default function LandingPage() {
               </div>
 
               <button onClick={() => setIsModalOpen(true)} className={styles.ctaButton}>
-                Começar Agora - É Grátis
+                Testar Agora!
                 <ArrowRight size={20} />
               </button>
               <p className={styles.ctaText}>

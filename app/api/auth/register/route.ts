@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       return NextResponse.json(
-        { error: 'Senha fraca', details: passwordValidation.errors },
+        { error: passwordValidation.errors.join('. ') },
         { status: 400 }
       );
     }
