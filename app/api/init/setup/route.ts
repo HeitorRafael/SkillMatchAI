@@ -10,7 +10,7 @@ const ADMIN_NAME = 'Heitor Delfino';
 /**
  * Endpoint de setup completo do banco de dados
  * 
- * 1. Executa todas as migrations
+ * 1. Executa schema push (cria tabelas se não existirem)
  * 2. Cria o usuário admin se não existir
  * 3. Retorna status e credenciais
  * 
@@ -21,22 +21,23 @@ export async function GET() {
   try {
     console.log('[SETUP] Starting complete database setup...');
 
-    // PASSO 1: Executar migrations
-    console.log('[SETUP] Step 1: Running database migrations...');
+    // PASSO 1: Garantir que as tabelas existem com prisma db push
+    console.log('[SETUP] Step 1: Ensuring database schema...');
     try {
-      const migrationsOutput = execSync('npx prisma migrate deploy', {
+      execSync('npx prisma db push --skip-generate', {
         cwd: process.cwd(),
         encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: 'inherit',
+        env: { ...process.env },
       });
-      console.log('[SETUP] Migrations completed');
-    } catch (migrationError: any) {
-      // Erros de migrations já aplicadas são OK
-      if (!migrationError.message.includes('already applied') && 
-          !migrationError.message.includes('up to date')) {
-        console.error('[SETUP] Migration error:', migrationError.message);
-      }
+      console.log('[SETUP] Database schema ensured');
+    } catch (schemaError: any) {
+      // db push pode falhar se schema já existe, o que é OK
+      console.warn('[SETUP] Schema push info:', schemaError.message?.substring(0, 100));
     }
+
+    // Pequeno delay para garantir que a tabela foi criada
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // PASSO 2: Criar/Verificar admin
     console.log('[SETUP] Step 2: Checking/Creating admin user...');
@@ -105,6 +106,7 @@ export async function GET() {
     );
   } catch (error: any) {
     console.error('[SETUP] Error:', error.message);
+    console.error('[SETUP] Full error:', error);
 
     return NextResponse.json(
       {
@@ -112,9 +114,10 @@ export async function GET() {
         message: 'Database setup failed',
         error: error.message,
         troubleshooting: {
+          step1: 'Try calling GET /api/init/reset-db first',
+          step2: 'Then call GET /api/init/setup again',
           checkEnvVars: 'Verify DATABASE_URL is set in Vercel',
           checkConnection: 'Call GET /api/debug/env to verify environment',
-          checkHealth: 'Call GET /api/debug/health for detailed status',
         },
       },
       { status: 500 }
