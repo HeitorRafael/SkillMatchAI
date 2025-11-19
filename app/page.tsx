@@ -22,6 +22,8 @@ export default function LandingPage() {
     setLoading(true);
     setError('');
 
+    console.log('[CLIENT] Tentando login com:', email);
+
     const result = await signIn('credentials', {
       redirect: false,
       email,
@@ -29,9 +31,13 @@ export default function LandingPage() {
       rememberMe,
     });
 
+    console.log('[CLIENT] Resultado do signIn:', result);
+
     if (result?.error) {
       setError('Credenciais inválidas. Tente novamente.');
+      console.error('[CLIENT] Erro de login:', result.error);
     } else {
+      console.log('[CLIENT] Login bem-sucedido, redirecionando para dashboard');
       setIsModalOpen(false);
       router.push('/dashboard');
     }
@@ -43,6 +49,8 @@ export default function LandingPage() {
     setLoading(true);
     setError('');
 
+    console.log('[CLIENT] Tentando cadastro com:', email);
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -52,12 +60,18 @@ export default function LandingPage() {
         body: JSON.stringify({ name, email, password }),
       });
 
+      console.log('[CLIENT] Resposta do cadastro:', response.status);
+
       if (!response.ok) {
         const data = await response.json();
         setError(data.error || data.message || 'Erro ao cadastrar. Tente novamente.');
+        console.error('[CLIENT] Erro no cadastro:', data);
         setLoading(false);
         return;
       }
+
+      const data = await response.json();
+      console.log('[CLIENT] Cadastro bem-sucedido:', data);
 
       // Automatically sign in after successful registration
       const result = await signIn('credentials', {
@@ -67,9 +81,13 @@ export default function LandingPage() {
         rememberMe: false,
       });
 
+      console.log('[CLIENT] Resultado do signIn após cadastro:', result);
+
       if (result?.error) {
         setError('Cadastro realizado, mas não foi possível fazer login automaticamente. Tente fazer login manualmente.');
+        console.error('[CLIENT] Erro ao fazer login após cadastro:', result.error);
       } else {
+        console.log('[CLIENT] Cadastro e login bem-sucedidos, redirecionando');
         setIsModalOpen(false);
         router.push('/dashboard');
       }

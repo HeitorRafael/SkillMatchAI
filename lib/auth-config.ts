@@ -24,12 +24,15 @@ export const authOptions: AuthOptions = {
                         return null;
                     }
 
+                    console.log('[AUTH] Tentativa de login:', credentials.email);
+
                     // Buscar usuário no banco de dados
                     let user;
                     try {
                         user = await prisma.user.findUnique({
                             where: { email: credentials.email.toLowerCase() },
                         });
+                        console.log('[AUTH] Usuário encontrado:', !!user);
                     } catch (dbError: any) {
                         console.error('[AUTH] Erro BD:', dbError.message);
                         return null;
@@ -49,6 +52,7 @@ export const authOptions: AuthOptions = {
                     let isPasswordValid = false;
                     try {
                         isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+                        console.log('[AUTH] Verificação de senha:', isPasswordValid);
                     } catch (bcryptError: any) {
                         console.error('[AUTH] Erro bcrypt:', bcryptError.message);
                         return null;
@@ -86,6 +90,7 @@ export const authOptions: AuthOptions = {
                 token.email = user.email;
                 token.name = user.name;
                 token.rememberMe = (user as any).rememberMe || false;
+                console.log('[AUTH JWT] Token created:', { id: token.id, email: token.email });
                 // Se rememberMe está ativo, estender expiração do token
                 if ((user as any).rememberMe) {
                     token.exp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 dias
@@ -99,6 +104,7 @@ export const authOptions: AuthOptions = {
                 session.user.email = token.email as string;
                 session.user.name = token.name as string;
                 (session.user as any).rememberMe = token.rememberMe as boolean;
+                console.log('[AUTH SESSION] Session updated:', { id: session.user.id, email: session.user.email });
             }
             return session;
         },
