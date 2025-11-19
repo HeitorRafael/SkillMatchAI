@@ -8,18 +8,21 @@ import styles from './DonationModal.module.css';
 interface DonationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSkip: () => void;
+    onSkip?: () => void;
+    onDonate?: () => void;
 }
 
-export default function DonationModal({ isOpen, onClose, onSkip }: DonationModalProps) {
+export default function DonationModal({ isOpen, onClose, onSkip, onDonate }: DonationModalProps) {
     const [pixData, setPixData] = useState<any>(null);
     const [qrCodeImage, setQrCodeImage] = useState<string>('');
     const [copied, setCopied] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [donors, setDonors] = useState<any[]>([]);
 
     useEffect(() => {
         if (isOpen) {
             loadPixData();
+            loadDonors();
         }
     }, [isOpen]);
 
@@ -56,6 +59,18 @@ export default function DonationModal({ isOpen, onClose, onSkip }: DonationModal
         }
     };
 
+    const loadDonors = async () => {
+        try {
+            const response = await fetch('/api/payment/donations-stats');
+            const data = await response.json();
+            if (data.success) {
+                setDonors(data.donors.slice(0, 5)); // Top 5 doadores
+            }
+        } catch (error) {
+            console.error('Erro ao carregar doadores:', error);
+        }
+    };
+
     const copyToClipboard = async () => {
         if (pixData?.payload) {
             try {
@@ -69,7 +84,12 @@ export default function DonationModal({ isOpen, onClose, onSkip }: DonationModal
     };
 
     const handleSkip = () => {
-        onSkip();
+        if (onSkip) onSkip();
+        onClose();
+    };
+
+    const handleDonationComplete = () => {
+        if (onDonate) onDonate();
         onClose();
     };
 
@@ -169,6 +189,30 @@ export default function DonationModal({ isOpen, onClose, onSkip }: DonationModal
                                 <li>Adicionar mais fontes de vagas</li>
                             </ul>
                         </div>
+
+                        {/* Top Donors */}
+                        {donors.length > 0 && (
+                            <div className={styles.donorsSection}>
+                                <h3 className={styles.donorsTitle}>❤️ Nossos Heróis</h3>
+                                <div className={styles.donorsList}>
+                                    {donors.map((donor, index) => (
+                                        <div key={index} className={styles.donorItem}>
+                                            <div className={styles.donorInfo}>
+                                                <span className={styles.donorName}>
+                                                    {donor.name ? donor.name.split(' ')[0] : donor.email.split('@')[0]}
+                                                </span>
+                                                <span className={styles.donorAmount}>
+                                                    R$ {donor.totalAmount.toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <span className={styles.donorCount}>
+                                                {donor.count}x
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -176,7 +220,7 @@ export default function DonationModal({ isOpen, onClose, onSkip }: DonationModal
                     <button onClick={handleSkip} className={styles.skipButton}>
                         Não quero ajudar agora
                     </button>
-                    <button onClick={onClose} className={styles.doneButton}>
+                    <button onClick={handleDonationComplete} className={styles.doneButton}>
                         Já fiz a doação
                     </button>
                 </div>

@@ -6,6 +6,7 @@ import styles from './page.module.css';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import SubscriptionModal from '@/components/SubscriptionModal';
+import DonationCounter from '@/components/DonationCounter';
 
 type Section = 'upload' | 'profile' | 'api';
 
@@ -223,6 +224,9 @@ export default function Dashboard() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Donation Counter */}
+                        <DonationCounter />
                     </div>
                 </aside>
 
