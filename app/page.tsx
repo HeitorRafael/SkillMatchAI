@@ -12,6 +12,7 @@ export default function LandingPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function LandingPage() {
       redirect: false,
       email,
       password,
+      rememberMe,
     });
 
     if (result?.error) {
@@ -269,6 +271,18 @@ export default function LandingPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
+                  </div>
+                  <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                      type="checkbox"
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <label htmlFor="rememberMe" style={{ cursor: 'pointer', margin: 0 }}>
+                      Lembrar de mim por 30 dias
+                    </label>
                   </div>
                   <button type="submit" className={styles.submitButton} disabled={loading}>
                     {loading ? 'Entrando...' : 'Entrar'}

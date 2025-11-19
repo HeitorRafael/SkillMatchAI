@@ -15,6 +15,7 @@ export const authOptions: AuthOptions = {
             credentials: {
                 email: { label: 'Email', type: 'email' },
                 password: { label: 'Password', type: 'password' },
+                rememberMe: { label: 'Remember Me', type: 'checkbox' },
             },
             async authorize(credentials) {
                 try {
@@ -64,6 +65,7 @@ export const authOptions: AuthOptions = {
                         id: user.id,
                         email: user.email,
                         name: user.name,
+                        rememberMe: credentials.rememberMe === 'on' || (credentials.rememberMe as any) === true,
                     };
                 } catch (error: any) {
                     console.error('[AUTH] Erro:', error.message);
@@ -83,6 +85,11 @@ export const authOptions: AuthOptions = {
                 token.id = user.id;
                 token.email = user.email;
                 token.name = user.name;
+                token.rememberMe = (user as any).rememberMe || false;
+                // Se rememberMe está ativo, estender expiração do token
+                if ((user as any).rememberMe) {
+                    token.exp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 dias
+                }
             }
             return token;
         },
@@ -91,6 +98,7 @@ export const authOptions: AuthOptions = {
                 session.user.id = token.id as string;
                 session.user.email = token.email as string;
                 session.user.name = token.name as string;
+                (session.user as any).rememberMe = token.rememberMe as boolean;
             }
             return session;
         },
