@@ -32,6 +32,11 @@ const LIMITS = {
         maxAnalyses: Infinity,
         daysToReset: 0,
     },
+    ENTERPRISE: {
+        period: 'unlimited', // Ilimitado (legado)
+        maxAnalyses: Infinity,
+        daysToReset: 0,
+    },
 };
 
 /**
@@ -84,8 +89,8 @@ export async function canUserAnalyze(userId: string): Promise<AnalysisLimit> {
 
     const limit = LIMITS[user.subscriptionTier];
 
-    // PREMIUM: Ilimitado
-    if (user.subscriptionTier === 'PREMIUM') {
+    // PREMIUM e ENTERPRISE: Ilimitado
+    if (user.subscriptionTier === 'PREMIUM' || user.subscriptionTier === 'ENTERPRISE') {
         return {
             canAnalyze: true,
             remainingAnalyses: Infinity,
@@ -289,6 +294,18 @@ export const SUBSCRIPTION_PLANS = {
             'Insights personalizados',
             'Suporte prioritário',
             'Acesso antecipado a novas funcionalidades',
+        ],
+    },
+    ENTERPRISE: {
+        name: 'Enterprise (Legado)',
+        price: 20,
+        period: 'mensal',
+        features: [
+            'Análises ilimitadas',
+            'Busca em múltiplos sites de emprego',
+            'Análise de compatibilidade com IA',
+            'Insights personalizados',
+            'Suporte prioritário',
         ],
     },
 };

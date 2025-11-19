@@ -25,7 +25,9 @@ export async function GET(request: NextRequest) {
                 image: true,
                 description: true,
                 skills: true,
-                subscription: true,
+                subscriptionTier: true,
+                subscriptionStatus: true,
+                subscriptionEndDate: true,
                 analysisCount: true,
                 lastAnalysis: true,
                 createdAt: true
@@ -91,7 +93,9 @@ export async function PUT(request: NextRequest) {
                 image: true,
                 description: true,
                 skills: true,
-                subscription: true,
+                subscriptionTier: true,
+                subscriptionStatus: true,
+                subscriptionEndDate: true,
                 analysisCount: true,
                 lastAnalysis: true
             }

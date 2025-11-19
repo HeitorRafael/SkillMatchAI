@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { tier } = body;
+        const { tier } = body as { tier: 'BASIC' | 'PREMIUM' };
 
         // Validar tier
         if (tier !== 'BASIC' && tier !== 'PREMIUM') {
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const amounts = {
+        const amounts: Record<'BASIC' | 'PREMIUM', number> = {
             BASIC: 10.00,
             PREMIUM: 20.00,
         };
