@@ -65,14 +65,16 @@
     width: 16rem;
     background: var(--white);
     border-right: 1px solid var(--gray-200);
-    min-height: calc(100vh - 4rem);
+    height: calc(100vh - 4rem);
     position: fixed;
     top: 4rem;
     left: 0;
+    overflow-y: auto;
 }
 
 .sidebarContent {
     padding: 1.5rem;
+    min-height: 100%;
 }
 
 .profile {
