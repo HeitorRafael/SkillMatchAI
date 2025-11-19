@@ -143,6 +143,33 @@ export default function JobsPage() {
     const [jobs, setJobs] = useState<any[]>([]);
     const [error, setError] = useState<string>('');
 
+    // Função auxiliar para gerar insights padrão
+    const generateDefaultInsights = (job: any) => {
+        return [
+            `Seu perfil corresponde a ${job.score}% dos requisitos`,
+            `Nível de senioridade: ${job.matchType === 'perfect' ? 'Excelente match' : 'Bom match'}`,
+            `Localização: ${job.location}`,
+            `Modalidade: ${job.remote === 'remote' ? 'Totalmente remoto' : job.remote === 'hybrid' ? 'Trabalho híbrido' : 'Presencial'}`
+        ];
+    };
+
+    // Função auxiliar para gerar benefícios padrão
+    const generateDefaultBenefits = (job: any) => {
+        const benefits = [];
+        if (job.remote === 'remote') benefits.push('100% remoto');
+        if (job.remote === 'hybrid') benefits.push('Modelo híbrido');
+        benefits.push('Plano de saúde');
+        benefits.push('Vale refeição');
+        return benefits;
+    };
+
+    // Função para gerar URL da vaga (usando LinkedIn como exemplo)
+    const generateJobUrl = (job: any) => {
+        // Você pode customizar isso para redirecionar para diferentes plataformas
+        const query = `${job.title} ${job.company}`.replace(/\s+/g, '+');
+        return `https://www.linkedin.com/jobs/search/?keywords=${query}&location=Brazil`;
+    };
+
     // Carregar dados da análise quando a página monta
     useEffect(() => {
         const loadJobsData = async () => {
@@ -152,24 +179,23 @@ export default function JobsPage() {
             try {
                 // Verificar se há dados em localStorage
                 const resumeData = localStorage.getItem('resumeData');
-                const analysisInProgress = localStorage.getItem('analysisInProgress');
 
-                if (!resumeData || !analysisInProgress) {
+                if (!resumeData) {
                     // Se não há dados, usar dados mockados
                     setJobs(mockJobs);
                     simulateProgressiveLoading(mockJobs.length);
                     return;
                 }
 
-                const { description, apiKey } = JSON.parse(resumeData);
+                const { description, resumeText, apiKey } = JSON.parse(resumeData);
 
-                // Chamar a API para análise completa
-                const response = await fetch('/api/jobs/analyze-and-search', {
+                // Chamar a API de deep search para análise inteligente com Gemini
+                const response = await fetch('/api/jobs/deep-search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        resumeText: description, // Temporário - idealmente seria o texto extraído do PDF
-                        userProfile: { description },
+                        description,
+                        resumeText,
                         apiKey
                     })
                 });
@@ -180,15 +206,34 @@ export default function JobsPage() {
 
                 const data = await response.json();
 
+                // Transformar os jobs da API para o formato esperado pelo componente
+                const processedJobs = (data.jobs || []).map((job: any, index: number) => ({
+                    id: job.id || index + 1,
+                    title: job.title,
+                    company: job.company,
+                    logo: job.company.substring(0, 2).toUpperCase(),
+                    location: job.location,
+                    remote: job.remote,
+                    salary: job.salary,
+                    type: job.type,
+                    postedDays: job.postedDays || 2,
+                    score: job.score,
+                    matchType: job.matchType === 'perfect' ? 'exact' : 'recommended',
+                    description: job.description,
+                    tags: job.tags || [],
+                    insights: job.insights || generateDefaultInsights(job),
+                    requirements: job.requirements || [],
+                    benefits: generateDefaultBenefits(job),
+                    url: generateJobUrl(job) // URL para candidatura
+                }));
+
                 // Salvar no localStorage
                 localStorage.setItem('analysis_result', JSON.stringify(data));
-                localStorage.setItem('user_profile', JSON.stringify(data.profile));
-                localStorage.removeItem('analysisInProgress');
                 localStorage.removeItem('resumeData');
 
-                // Usar os jobs da API
-                setJobs(data.jobs || mockJobs);
-                simulateProgressiveLoading(data.jobs?.length || mockJobs.length);
+                // Usar os jobs processados
+                setJobs(processedJobs.length > 0 ? processedJobs : mockJobs);
+                simulateProgressiveLoading(processedJobs.length || mockJobs.length);
 
             } catch (err: any) {
                 console.error('Erro:', err);
@@ -316,35 +361,35 @@ export default function JobsPage() {
                                     className={`${styles.filterButton} ${filterType === 'all' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Todas as Vagas</span>
-                                    <span className={styles.filterCount}>{mockJobs.length}</span>
+                                    <span className={styles.filterCount}>{jobs.length}</span>
                                 </button>
                                 <button
                                     onClick={() => setFilterType('exact')}
                                     className={`${styles.filterButton} ${filterType === 'exact' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Match Exato</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.matchType === 'exact').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.matchType === 'exact').length}</span>
                                 </button>
                                 <button
                                     onClick={() => setFilterType('profile')}
                                     className={`${styles.filterButton} ${filterType === 'profile' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Baseado no Perfil</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.matchType === 'profile').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.matchType === 'profile').length}</span>
                                 </button>
                                 <button
                                     onClick={() => setFilterType('recommended')}
                                     className={`${styles.filterButton} ${filterType === 'recommended' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Recomendadas</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.matchType === 'recommended').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.matchType === 'recommended').length}</span>
                                 </button>
                                 <button
                                     onClick={() => setFilterType('high_salary')}
                                     className={`${styles.filterButton} ${filterType === 'high_salary' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Melhor Salário</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.matchType === 'high_salary').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.matchType === 'high_salary').length}</span>
                                 </button>
                             </div>
                         </div>
@@ -358,28 +403,28 @@ export default function JobsPage() {
                                     className={`${styles.filterButton} ${remoteType === 'all' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Todas</span>
-                                    <span className={styles.filterCount}>{mockJobs.length}</span>
+                                    <span className={styles.filterCount}>{jobs.length}</span>
                                 </button>
                                 <button
                                     onClick={() => setRemoteType('remote')}
                                     className={`${styles.filterButton} ${remoteType === 'remote' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Remoto</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.remote === 'remote').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.remote === 'remote').length}</span>
                                 </button>
                                 <button
                                     onClick={() => setRemoteType('hybrid')}
                                     className={`${styles.filterButton} ${remoteType === 'hybrid' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Híbrido</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.remote === 'hybrid').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.remote === 'hybrid').length}</span>
                                 </button>
                                 <button
                                     onClick={() => setRemoteType('onsite')}
                                     className={`${styles.filterButton} ${remoteType === 'onsite' ? styles.filterButtonActive : ''}`}
                                 >
                                     <span>Presencial</span>
-                                    <span className={styles.filterCount}>{mockJobs.filter(j => j.remote === 'onsite').length}</span>
+                                    <span className={styles.filterCount}>{jobs.filter(j => j.remote === 'onsite').length}</span>
                                 </button>
                             </div>
                         </div>
@@ -524,10 +569,15 @@ export default function JobsPage() {
                                                         <Bookmark size={16} />
                                                         Salvar
                                                     </button>
-                                                    <button className={`${styles.actionButton} ${styles.applyButton}`}>
+                                                    <a 
+                                                        href={job.url} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className={`${styles.actionButton} ${styles.applyButton}`}
+                                                    >
                                                         <ExternalLink size={16} />
                                                         Candidatar-se
-                                                    </button>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
