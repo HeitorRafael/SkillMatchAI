@@ -2,54 +2,72 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
+const ADMIN_EMAIL = 'heitorbdelfino@gmail.com';
+const ADMIN_PASSWORD = 'Senha123'; // Senha simples: maiúscula, minúscula, número
+const ADMIN_NAME = 'Heitor Delfino';
+
 /**
  * Endpoint de inicialização segura
- * Cria usuário admin APENAS se não existir nenhum usuário no banco
- * Depois, se já existir usuários, retorna erro 403
+ * - Se não existir admin, cria automaticamente
+ * - Se já existir admin, retorna os dados
+ * - Seguro: nunca recria usuários existentes
  */
 export async function GET() {
   try {
-    // Verificar se já existem usuários no banco
-    const userCount = await prisma.user.count();
+    // Verificar se admin já existe
+    let adminUser = await prisma.user.findUnique({
+      where: { email: ADMIN_EMAIL },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+      },
+    });
 
-    // Se já existem usuários, retorna erro 403 (proibido)
-    // Isso previne que alguém tente recrear o admin depois
-    if (userCount > 0) {
+    if (adminUser) {
       return NextResponse.json(
         {
-          status: 'FORBIDDEN',
-          message: 'Users already exist in database. This endpoint only works on empty databases.',
-          userCount,
+          status: 'EXISTS',
+          message: 'Admin user already exists in database',
+          user: adminUser,
+          credentials: {
+            email: ADMIN_EMAIL,
+            password: ADMIN_PASSWORD,
+          },
         },
-        { status: 403 }
+        { status: 200 }
       );
     }
 
-    // Só chega aqui se o banco está vazio
-    // Criar o usuário admin
-    const hashedPassword = await bcrypt.hash('senha123', 12);
+    // Admin não existe, criar agora
+    console.log('[INIT] Creating admin user...');
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
 
-    const adminUser = await prisma.user.create({
+    adminUser = await prisma.user.create({
       data: {
-        name: 'Heitor Delfino',
-        email: 'heitorbdelfino@gmail.com',
+        name: ADMIN_NAME,
+        email: ADMIN_EMAIL,
         password: hashedPassword,
       },
       select: {
         id: true,
         email: true,
         name: true,
+        createdAt: true,
       },
     });
 
+    console.log('[INIT] Admin user created:', adminUser.email);
+
     return NextResponse.json(
       {
-        status: 'SUCCESS',
+        status: 'CREATED',
         message: 'Admin user created successfully',
         user: adminUser,
         credentials: {
-          email: 'heitorbdelfino@gmail.com',
-          password: 'senha123',
+          email: ADMIN_EMAIL,
+          password: ADMIN_PASSWORD,
           note: 'Change password after first login!',
         },
       },
