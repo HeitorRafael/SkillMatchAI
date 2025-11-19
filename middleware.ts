@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Middleware de segurança global
  * Protege contra ataques comuns:
+ * - Valida variáveis de ambiente
  * - Injeta headers de segurança
  * - Valida origin (CORS)
  * - Rate limiting básico
@@ -30,6 +31,34 @@ function checkRateLimit(ip: string, maxRequests: number = 100, windowMs: number 
 }
 
 export function middleware(request: NextRequest) {
+    // Validar variáveis de ambiente críticas
+    const requiredEnvVars = [
+        'NEXTAUTH_SECRET',
+        'NEXTAUTH_URL',
+        'DATABASE_URL',
+    ];
+
+    const missingVars = requiredEnvVars.filter(
+        (varName) => !process.env[varName] || process.env[varName]?.trim() === ''
+    );
+
+    if (missingVars.length > 0) {
+        // Log do erro
+        console.error(`❌ Missing environment variables: ${missingVars.join(', ')}`);
+
+        // Se é requisição de API de auth, retorna erro claro
+        if (request.nextUrl.pathname.startsWith('/api/auth')) {
+            return NextResponse.json(
+                {
+                    error: 'Server configuration error',
+                    message: 'Missing required environment variables',
+                    details: process.env.NODE_ENV === 'development' ? missingVars : undefined,
+                },
+                { status: 500 }
+            );
+        }
+    }
+
     // Extrair IP do cliente
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
                request.headers.get('x-real-ip') ||
