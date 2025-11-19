@@ -76,7 +76,7 @@ export default function Dashboard() {
             formData.append('apiKey', apiKey);
 
             // Chamar API de análise
-            const response = await fetch('/api/analyze', {
+            const response = await fetch('/api/auth/analyze', {
                 method: 'POST',
                 body: formData
             });
@@ -95,7 +95,6 @@ export default function Dashboard() {
             router.push('/jobs');
 
         } catch (err: any) {
-            console.error('Erro na análise:', err);
             setError(err.message || 'Erro ao processar análise. Verifique sua API key e tente novamente.');
         } finally {
             setAnalyzing(false);
@@ -104,13 +103,11 @@ export default function Dashboard() {
 
     const handleProfileSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Perfil atualizado');
         alert('Perfil atualizado com sucesso!');
     };
 
     const handleApiKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('API Key salva');
         alert('Chave API salva com segurança!');
     };
 

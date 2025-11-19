@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Ignored markdown files
+LOGGING_PLAN.md
+SECURITY.md
+SETUP_INSTRUCTIONS.md
+oquefalta.txt

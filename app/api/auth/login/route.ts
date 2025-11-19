@@ -35,7 +35,6 @@ export async function POST(request: Request) {
     // and send it back to the client. For now, we'll just return user info.
     return NextResponse.json({ message: 'Login successful', user: { id: user.id, email: user.email, name: user.name } }, { status: 200 });
   } catch (error) {
-    console.error('Login error:', error);
     return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
   }
 }

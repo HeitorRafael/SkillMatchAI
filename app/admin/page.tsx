@@ -61,7 +61,6 @@ export default function AdminPanel() {
 
     const handleSendEmail = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Enviando email:', { emailSubject, emailMessage });
         alert(`Email enviado para todos os usuários!\nAssunto: ${emailSubject}`);
         setShowEmailModal(false);
         setEmailSubject('');
