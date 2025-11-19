@@ -66,9 +66,9 @@ export function middleware(request: NextRequest) {
 
     // Extrair IP do cliente
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
-               request.headers.get('x-real-ip') ||
-               'unknown';
-    
+        request.headers.get('x-real-ip') ||
+        'unknown';
+
     // Rate limiting para API routes
     if (request.nextUrl.pathname.startsWith('/api/')) {
         if (!checkRateLimit(ip)) {

@@ -10,22 +10,22 @@ import { Pool } from 'pg';
  * GET /api/tools/database/init
  */
 export async function GET() {
-  let client;
-  try {
-    console.log('[DB INIT] Starting database initialization...');
+    let client;
+    try {
+        console.log('[DB INIT] Starting database initialization...');
 
-    const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    });
+        const pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: {
+                rejectUnauthorized: false,
+            },
+        });
 
-    client = await pool.connect();
-    console.log('[DB INIT] Connected to database');
+        client = await pool.connect();
+        console.log('[DB INIT] Connected to database');
 
-    // Executar o schema SQL completo
-    const schemaSql = `
+        // Executar o schema SQL completo
+        const schemaSql = `
       -- Drop existing tables if they exist (para reset completo)
       DROP TABLE IF EXISTS "user_jobs" CASCADE;
       DROP TABLE IF EXISTS "jobs" CASCADE;
@@ -151,39 +151,39 @@ export async function GET() {
       CREATE INDEX "idx_user_jobs_jobId" ON "user_jobs"("jobId");
     `;
 
-    console.log('[DB INIT] Executing schema SQL...');
-    await client.query(schemaSql);
-    console.log('[DB INIT] Schema created successfully');
+        console.log('[DB INIT] Executing schema SQL...');
+        await client.query(schemaSql);
+        console.log('[DB INIT] Schema created successfully');
 
-    client.release();
-    await pool.end();
-
-    return NextResponse.json(
-      {
-        status: 'SUCCESS',
-        message: 'Database schema created successfully',
-        nextStep: 'Tables created. Run setup to create admin user.',
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    console.error('[DB INIT] Error:', error.message);
-
-    if (client) {
-      try {
         client.release();
-      } catch (e) {
-        console.error('[DB INIT] Error releasing client:', e);
-      }
-    }
+        await pool.end();
 
-    return NextResponse.json(
-      {
-        status: 'ERROR',
-        message: 'Failed to create database schema',
-        error: error.message,
-      },
-      { status: 500 }
-    );
-  }
+        return NextResponse.json(
+            {
+                status: 'SUCCESS',
+                message: 'Database schema created successfully',
+                nextStep: 'Tables created. Run setup to create admin user.',
+            },
+            { status: 200 }
+        );
+    } catch (error: any) {
+        console.error('[DB INIT] Error:', error.message);
+
+        if (client) {
+            try {
+                client.release();
+            } catch (e) {
+                console.error('[DB INIT] Error releasing client:', e);
+            }
+        }
+
+        return NextResponse.json(
+            {
+                status: 'ERROR',
+                message: 'Failed to create database schema',
+                error: error.message,
+            },
+            { status: 500 }
+        );
+    }
 }

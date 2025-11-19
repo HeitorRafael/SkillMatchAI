@@ -148,7 +148,7 @@ export default function JobsPage() {
         const loadJobsData = async () => {
             setIsLoading(true);
             setLoadedCards([]);
-            
+
             try {
                 // Verificar se há dados em localStorage
                 const resumeData = localStorage.getItem('resumeData');
@@ -179,7 +179,7 @@ export default function JobsPage() {
                 }
 
                 const data = await response.json();
-                
+
                 // Salvar no localStorage
                 localStorage.setItem('analysis_result', JSON.stringify(data));
                 localStorage.setItem('user_profile', JSON.stringify(data.profile));
@@ -447,89 +447,89 @@ export default function JobsPage() {
                                 {filteredJobs.map((job: any, index: number) => (
                                     loadedCards.includes(index) && (
                                         <div key={job.id} className={`${styles.jobCard} ${styles.cardLoaded}`}>
-                                        <div className={styles.jobHeader}>
-                                            <div className={styles.jobInfo}>
-                                                <div className={styles.jobCompany}>
-                                                    <div className={styles.companyLogo}>{job.logo}</div>
-                                                    {job.company}
+                                            <div className={styles.jobHeader}>
+                                                <div className={styles.jobInfo}>
+                                                    <div className={styles.jobCompany}>
+                                                        <div className={styles.companyLogo}>{job.logo}</div>
+                                                        {job.company}
+                                                    </div>
+                                                    <h2 className={styles.jobTitle}>{job.title}</h2>
+                                                    <div className={styles.jobMeta}>
+                                                        <div className={styles.metaItem}>
+                                                            <MapPin size={14} />
+                                                            {job.location}
+                                                        </div>
+                                                        <div className={styles.metaItem}>
+                                                            {getRemoteIcon(job.remote)}
+                                                            {getRemoteLabel(job.remote)}
+                                                        </div>
+                                                        <div className={styles.metaItem}>
+                                                            <Briefcase size={14} />
+                                                            {job.type}
+                                                        </div>
+                                                        <div className={styles.metaItem}>
+                                                            <Clock size={14} />
+                                                            {job.postedDays}d atrás
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <h2 className={styles.jobTitle}>{job.title}</h2>
-                                                <div className={styles.jobMeta}>
-                                                    <div className={styles.metaItem}>
-                                                        <MapPin size={14} />
-                                                        {job.location}
+
+                                                <div className={styles.scoreWrapper}>
+                                                    <div className={`${styles.score} ${getScoreClass(job.score)}`}>
+                                                        {job.score}%
                                                     </div>
-                                                    <div className={styles.metaItem}>
-                                                        {getRemoteIcon(job.remote)}
-                                                        {getRemoteLabel(job.remote)}
-                                                    </div>
-                                                    <div className={styles.metaItem}>
-                                                        <Briefcase size={14} />
-                                                        {job.type}
-                                                    </div>
-                                                    <div className={styles.metaItem}>
-                                                        <Clock size={14} />
-                                                        {job.postedDays}d atrás
-                                                    </div>
+                                                    <p className={styles.scoreLabel}>Compatibilidade</p>
                                                 </div>
                                             </div>
 
-                                            <div className={styles.scoreWrapper}>
-                                                <div className={`${styles.score} ${getScoreClass(job.score)}`}>
-                                                    {job.score}%
-                                                </div>
-                                                <p className={styles.scoreLabel}>Compatibilidade</p>
-                                            </div>
-                                        </div>
+                                            <p className={styles.jobDescription}>{job.description}</p>
 
-                                        <p className={styles.jobDescription}>{job.description}</p>
-
-                                        <div className={styles.jobTags}>
-                                            {job.tags.map((tag: string, index: number) => (
-                                                <span key={index} className={styles.tag}>{tag}</span>
-                                            ))}
-                                            <span className={`${styles.tag} ${job.remote === 'remote' ? styles.tagRemote :
+                                            <div className={styles.jobTags}>
+                                                {job.tags.map((tag: string, index: number) => (
+                                                    <span key={index} className={styles.tag}>{tag}</span>
+                                                ))}
+                                                <span className={`${styles.tag} ${job.remote === 'remote' ? styles.tagRemote :
                                                     job.remote === 'hybrid' ? styles.tagHybrid :
                                                         styles.tagOnsite
-                                                }`}>
-                                                {getRemoteLabel(job.remote)}
-                                            </span>
-                                        </div>
+                                                    }`}>
+                                                    {getRemoteLabel(job.remote)}
+                                                </span>
+                                            </div>
 
-                                        <div className={styles.aiInsights}>
-                                            <div className={styles.insightsHeader}>
-                                                <Sparkles size={16} />
-                                                Insights da IA
+                                            <div className={styles.aiInsights}>
+                                                <div className={styles.insightsHeader}>
+                                                    <Sparkles size={16} />
+                                                    Insights da IA
+                                                </div>
+                                                <div className={styles.insightsList}>
+                                                    {job.insights.map((insight: string, index: number) => (
+                                                        <div key={index} className={styles.insightItem}>
+                                                            {index === 0 && <CheckCircle size={14} className={styles.insightIcon} style={{ color: '#10b981' }} />}
+                                                            {index === 1 && <TrendingUp size={14} className={styles.insightIcon} style={{ color: '#3b82f6' }} />}
+                                                            {index === 2 && <Target size={14} className={styles.insightIcon} style={{ color: '#f59e0b' }} />}
+                                                            {index === 3 && <Lightbulb size={14} className={styles.insightIcon} style={{ color: '#8b5cf6' }} />}
+                                                            <span>{insight}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className={styles.insightsList}>
-                                                {job.insights.map((insight: string, index: number) => (
-                                                    <div key={index} className={styles.insightItem}>
-                                                        {index === 0 && <CheckCircle size={14} className={styles.insightIcon} style={{ color: '#10b981' }} />}
-                                                        {index === 1 && <TrendingUp size={14} className={styles.insightIcon} style={{ color: '#3b82f6' }} />}
-                                                        {index === 2 && <Target size={14} className={styles.insightIcon} style={{ color: '#f59e0b' }} />}
-                                                        {index === 3 && <Lightbulb size={14} className={styles.insightIcon} style={{ color: '#8b5cf6' }} />}
-                                                        <span>{insight}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
 
-                                        <div className={styles.jobFooter}>
-                                            <div className={styles.jobSalary}>
-                                                <DollarSign size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />
-                                                Salário: <span className={styles.salaryAmount}>{job.salary}</span>
+                                            <div className={styles.jobFooter}>
+                                                <div className={styles.jobSalary}>
+                                                    <DollarSign size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />
+                                                    Salário: <span className={styles.salaryAmount}>{job.salary}</span>
+                                                </div>
+                                                <div className={styles.jobActions}>
+                                                    <button className={`${styles.actionButton} ${styles.saveButton}`}>
+                                                        <Bookmark size={16} />
+                                                        Salvar
+                                                    </button>
+                                                    <button className={`${styles.actionButton} ${styles.applyButton}`}>
+                                                        <ExternalLink size={16} />
+                                                        Candidatar-se
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className={styles.jobActions}>
-                                                <button className={`${styles.actionButton} ${styles.saveButton}`}>
-                                                    <Bookmark size={16} />
-                                                    Salvar
-                                                </button>
-                                                <button className={`${styles.actionButton} ${styles.applyButton}`}>
-                                                    <ExternalLink size={16} />
-                                                    Candidatar-se
-                                                </button>
-                                            </div>
-                                        </div>
                                         </div>
                                     )
                                 ))}

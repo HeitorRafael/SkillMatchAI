@@ -19,13 +19,13 @@ export function encryptSensitiveData(plaintext: string): string {
     try {
         const iv = crypto.randomBytes(IV_LENGTH);
         const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
-        
+
         const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
         let encrypted = cipher.update(plaintext, 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        
+
         const authTag = cipher.getAuthTag();
-        
+
         const result = `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
         return Buffer.from(result).toString('base64');
     } catch (error) {
@@ -40,17 +40,17 @@ export function decryptSensitiveData(encrypted: string): string {
     try {
         const decoded = Buffer.from(encrypted, 'base64').toString('utf-8');
         const [ivHex, authTagHex, encryptedData] = decoded.split(':');
-        
+
         const iv = Buffer.from(ivHex, 'hex');
         const authTag = Buffer.from(authTagHex, 'hex');
         const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
-        
+
         const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
         decipher.setAuthTag(authTag);
-        
+
         let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
-        
+
         return decrypted;
     } catch (error) {
         throw new Error('Erro ao descriptografar dados');
@@ -74,6 +74,6 @@ export function verifyPassword(password: string, hash: string): boolean {
     const saltBuffer = Buffer.from(salt, 'hex');
     const keyBuffer = Buffer.from(key, 'hex');
     const derivedKey = crypto.pbkdf2Sync(password, saltBuffer, 100000, 64, 'sha512');
-    
+
     return crypto.timingSafeEqual(keyBuffer, derivedKey);
 }

@@ -131,7 +131,8 @@
 }
 
 .navButtonAdmin {
-    background: var(--blue-600); /* Cor diferente para o botão de admin */
+    background: var(--blue-600);
+    /* Cor diferente para o botão de admin */
     color: var(--white);
 }
 
@@ -623,6 +624,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -633,6 +635,7 @@
         transform: translateY(2rem);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -643,11 +646,12 @@
     0% {
         width: 0;
     }
+
     50% {
         width: 100%;
     }
+
     100% {
         width: 100%;
     }
 }
-

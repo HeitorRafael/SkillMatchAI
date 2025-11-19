@@ -10,10 +10,10 @@ export async function extractPdfText(buffer: ArrayBuffer): Promise<string> {
     try {
         // Import dinâmico para evitar problemas com serverless
         const pdfParse = require('pdf-parse');
-        
+
         const nodeBuffer = Buffer.from(buffer);
         const pdfData = await pdfParse(nodeBuffer);
-        
+
         const text = pdfData.text || '';
 
         // Validação: PDF precisa ter texto

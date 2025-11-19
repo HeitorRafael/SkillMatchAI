@@ -68,12 +68,12 @@ async function callGeminiAPI(
 
         if (!response.ok) {
             const error = await response.json();
-            
+
             // Tratamento específico de erros da API Gemini
             if (response.status === 401 || response.status === 403) {
                 throw new Error('API_KEY_INVALID');
             }
-            
+
             if (response.status === 429) {
                 throw new Error('RATE_LIMIT');
             }
@@ -245,7 +245,7 @@ Retorne APENAS um JSON válido (sem markdown, sem explicações, sem \`\`\`json)
             analysisData = analysisResponse;
         } catch (apiError: any) {
             const errorMessage = apiError.message || 'Unknown error';
-            
+
             if (errorMessage.includes('API_KEY_INVALID')) {
                 return NextResponse.json(
                     { error: 'Chave API inválida. Verifique se a chave está correta.' },
@@ -369,7 +369,7 @@ IMPORTANTE: Retorne APENAS o JSON, sem explicações antes ou depois.`,
             );
         } catch (apiError: any) {
             const errorMessage = apiError.message || 'Unknown error';
-            
+
             if (errorMessage.includes('TIMEOUT')) {
                 return NextResponse.json(
                     { error: 'Geração de vagas levou muito tempo. Tente novamente.' },

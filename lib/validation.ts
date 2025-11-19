@@ -5,7 +5,7 @@
 
 export function sanitizeString(input: any): string {
     if (typeof input !== 'string') return '';
-    
+
     return input
         // Remove caracteres nulos
         .replace(/\0/g, '')
