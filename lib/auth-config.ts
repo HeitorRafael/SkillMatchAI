@@ -19,7 +19,8 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            throw new Error('Email e senha são obrigatórios');
+            console.error('[AUTH] Credenciais vazias');
+            return null;
           }
 
           // Buscar usuário no banco de dados
@@ -29,16 +30,18 @@ export const authOptions: AuthOptions = {
               where: { email: credentials.email.toLowerCase() },
             });
           } catch (dbError: any) {
-            console.error('[AUTH] Erro ao buscar usuário no BD:', dbError.message);
-            throw new Error('Erro ao conectar ao banco de dados. Tente novamente.');
+            console.error('[AUTH] Erro BD:', dbError.message);
+            return null;
           }
 
           if (!user) {
-            throw new Error('Email ou senha incorretos');
+            console.warn('[AUTH] Usuário não encontrado:', credentials.email);
+            return null;
           }
 
           if (!user.password) {
-            throw new Error('Usuário não possui senha configurada');
+            console.warn('[AUTH] Usuário sem senha:', credentials.email);
+            return null;
           }
 
           // Comparar senha
@@ -46,18 +49,16 @@ export const authOptions: AuthOptions = {
           try {
             isPasswordValid = await bcrypt.compare(credentials.password, user.password);
           } catch (bcryptError: any) {
-            console.error('[AUTH] Erro ao comparar senha:', bcryptError.message);
-            throw new Error('Erro ao validar senha. Tente novamente.');
+            console.error('[AUTH] Erro bcrypt:', bcryptError.message);
+            return null;
           }
 
           if (!isPasswordValid) {
-            throw new Error('Email ou senha incorretos');
+            console.warn('[AUTH] Senha incorreta:', credentials.email);
+            return null;
           }
 
-          // Log de sucesso (em development)
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[AUTH] Login bem-sucedido: ${user.email}`);
-          }
+          console.log('[AUTH] Login OK:', user.email);
 
           return {
             id: user.id,
@@ -65,20 +66,19 @@ export const authOptions: AuthOptions = {
             name: user.name,
           };
         } catch (error: any) {
-          // Log do erro para debugging
-          console.error('[AUTH] Erro na autenticação:', error.message);
-          
-          // Retorna null para não revelar detalhes do erro em produção
-          throw new Error(error.message || 'Erro ao autenticar. Tente novamente.');
+          console.error('[AUTH] Erro:', error.message);
+          return null;
         }
       },
     }),
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 dias
+    updateAge: 24 * 60 * 60, // 1 dia
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -87,9 +87,7 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        // Re-adding type assertions to fix Vercel build error
-        // where token properties are inferred as 'unknown'.
+      if (session.user && token) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
@@ -99,6 +97,8 @@ export const authOptions: AuthOptions = {
   },
   pages: {
     signIn: '/',
+    error: '/',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };

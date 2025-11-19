@@ -42,17 +42,12 @@ next-env.d.ts
 
 /app/generated/prisma
 
-# Ignored markdown files
+# Ignored markdown files (documentation only)
 LOGGING_PLAN.md
 SECURITY.md
 SETUP_INSTRUCTIONS.md
 oquefalta.txt
 VERCEL_ENV_SETUP.md
-VARIAVEIS_EXPLICADAS.md
-RESUMO_VARIAVEIS.md
-CHAVES_GERADAS.md
-ENV_SECURITY_GUIDE.md
-DEPLOY_STATUS.md
-VERCEL_VISUAL_GUIDE.md
-TLDR.md
-DOCUMENTACAO_INDEX.md
+NOVIDADES.md
+SETUP.md
+CHECKLIST.md
