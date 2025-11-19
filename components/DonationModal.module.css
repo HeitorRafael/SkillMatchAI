@@ -1,0 +1,348 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background: #ffffff;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.closeButton:hover {
+    background: #e5e7eb;
+    transform: scale(1.1);
+}
+
+.header {
+    text-align: center;
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.heartIcon {
+    color: #ef4444;
+    margin-bottom: 1rem;
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.content {
+    padding: 2rem;
+}
+
+.loading {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.qrCodeSection {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.qrCodeWrapper {
+    display: inline-block;
+    padding: 1rem;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+}
+
+.qrCodeImage {
+    width: 200px;
+    height: 200px;
+    display: block;
+}
+
+.qrCodePlaceholder {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.qrCodeHint {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+.divider span {
+    background: #ffffff;
+    padding: 0 1rem;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.pixKeySection {
+    margin-bottom: 1.5rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.pixKeyBox {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pixKeyInput {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: #374151;
+    background: #f9fafb;
+}
+
+.copyButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.copyButton:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+}
+
+.amountSuggestion {
+    text-align: center;
+    padding: 1rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.suggestionText {
+    font-size: 0.95rem;
+    color: #166534;
+    margin-bottom: 0.25rem;
+}
+
+.suggestionHint {
+    font-size: 0.8rem;
+    color: #16a34a;
+}
+
+.benefits {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.benefitsTitle {
+    font-weight: 600;
+    color: #6b21a8;
+    margin-bottom: 0.75rem;
+}
+
+.benefitsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.benefitsList li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+    color: #7e22ce;
+    font-size: 0.9rem;
+}
+
+.benefitsList li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #a855f7;
+    font-weight: bold;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.skipButton {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.skipButton:hover {
+    background: #e5e7eb;
+}
+
+.doneButton {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.doneButton:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.thankYou {
+    text-align: center;
+    padding: 0 2rem 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+    .modal {
+        max-height: 95vh;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .qrCodeImage,
+    .qrCodePlaceholder {
+        width: 180px;
+        height: 180px;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+}

@@ -68,18 +68,28 @@ model User {
   description     String?   @db.Text
   skills          String[]  // Array of skills
 
-  subscription    SubscriptionTier @default(FREE)
-  analysisCount   Int              @default(0)
-  lastAnalysis    DateTime?
+  // Subscription fields
+  subscriptionTier      SubscriptionTier @default(FREE)
+  subscriptionStatus    SubscriptionStatus @default(ACTIVE)
+  subscriptionStartDate DateTime?
+  subscriptionEndDate   DateTime?
+
+  // Analysis limits
+  analysisCount         Int       @default(0)
+  lastAnalysis          DateTime?
+  monthlyAnalysisCount  Int       @default(0) // Reset every month
+  lastMonthlyReset      DateTime? @default(now())
 
   accounts        Account[]
   sessions        Session[]
   analyses        Analysis[]
   userJobs        UserJob[]
+  payments        Payment[]
+  donations       Donation[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@map("users")
 }
 
@@ -142,12 +152,81 @@ model UserJob {
   @@map("user_jobs")
 }
 
+// -- PAYMENT MODELS --
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+
+  amount          Float    // Valor em reais
+  currency        String   @default("BRL")
+  status          PaymentStatus @default(PENDING)
+
+  // PIX data
+  pixKey          String?  // Chave PIX usada
+  pixQRCode       String?  @db.Text // QR Code em base64
+  pixCopyPaste    String?  @db.Text // Código copia e cola
+  pixTxId         String?  @unique // Transaction ID do PIX
+
+  subscriptionTier SubscriptionTier // Plano adquirido
+
+  // Webhook validation
+  webhookReceived  Boolean  @default(false)
+  webhookData      Json?    // Dados do webhook
+
+  paidAt           DateTime?
+  expiresAt        DateTime? // QR Code expiration
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("payments")
+}
+
+model Donation {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+
+  email           String?  // Email do doador (se não autenticado)
+  amount          Float
+  currency        String   @default("BRL")
+  status          PaymentStatus @default(PENDING)
+
+  pixKey          String?
+  pixQRCode       String?  @db.Text
+  pixCopyPaste    String?  @db.Text
+  pixTxId         String?  @unique
+
+  message         String?  @db.Text // Mensagem do doador (opcional)
+
+  paidAt          DateTime?
+  createdAt       DateTime @default(now())
+
+  @@map("donations")
+}
+
 // -- ENUMS --
 
 enum SubscriptionTier {
-  FREE
-  PREMIUM
-  ENTERPRISE
+  FREE       // 1 análise por mês
+  BASIC      // R$ 10/mês - 1 análise por semana
+  PREMIUM    // R$ 20/mês - Análises ilimitadas
+  ENTERPRISE // Legado - será migrado para PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  EXPIRED
 }
 
 enum RemoteType {
