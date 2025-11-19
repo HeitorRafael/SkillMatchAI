@@ -150,7 +150,19 @@ export async function POST(request: NextRequest) {
             const remainingCount = 20 - finalJobs.length;
             const mockToAdd = MOCK_JOBS.slice(0, remainingCount);
 
-            finalJobs = [...finalJobs, ...mockToAdd];
+            // Normalize mock jobs to match JobResult shape (add missing arrays) and ensure correct literal types
+            const typedMockJobs = mockToAdd.map(m => ({
+                ...m,
+                remote: (m as any).remote as 'remote' | 'hybrid' | 'onsite',
+                insights: (m as any).insights ?? [],
+                requirements: (m as any).requirements ?? [],
+                benefits: (m as any).benefits ?? [],
+            })) as JobResult[];
+
+            finalJobs = [
+                ...finalJobs,
+                ...typedMockJobs,
+            ];
         }
 
         // Garantir exatamente 20 vagas

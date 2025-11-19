@@ -569,9 +569,9 @@ export default function JobsPage() {
                                                         <Bookmark size={16} />
                                                         Salvar
                                                     </button>
-                                                    <a 
-                                                        href={job.url} 
-                                                        target="_blank" 
+                                                    <a
+                                                        href={job.url}
+                                                        target="_blank"
                                                         rel="noopener noreferrer"
                                                         className={`${styles.actionButton} ${styles.applyButton}`}
                                                     >
