@@ -14,36 +14,60 @@ export const authOptions: AuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Email e senha são obrigatórios');
+          }
+
+          // Buscar usuário no banco de dados
+          let user;
+          try {
+            user = await prisma.user.findUnique({
+              where: { email: credentials.email.toLowerCase() },
+            });
+          } catch (dbError: any) {
+            console.error('[AUTH] Erro ao buscar usuário no BD:', dbError.message);
+            throw new Error('Erro ao conectar ao banco de dados. Tente novamente.');
+          }
+
+          if (!user) {
+            throw new Error('Email ou senha incorretos');
+          }
+
+          if (!user.password) {
+            throw new Error('Usuário não possui senha configurada');
+          }
+
+          // Comparar senha
+          let isPasswordValid = false;
+          try {
+            isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          } catch (bcryptError: any) {
+            console.error('[AUTH] Erro ao comparar senha:', bcryptError.message);
+            throw new Error('Erro ao validar senha. Tente novamente.');
+          }
+
+          if (!isPasswordValid) {
+            throw new Error('Email ou senha incorretos');
+          }
+
+          // Log de sucesso (em development)
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[AUTH] Login bem-sucedido: ${user.email}`);
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error: any) {
+          // Log do erro para debugging
+          console.error('[AUTH] Erro na autenticação:', error.message);
+          
+          // Retorna null para não revelar detalhes do erro em produção
+          throw new Error(error.message || 'Erro ao autenticar. Tente novamente.');
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user) {
-          return null;
-        }
-
-        if (!user.password) {
-          throw new Error("Invalid credentials");
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
       },
     }),
   ],
