@@ -59,9 +59,8 @@ export default function Dashboard() {
             setError('Por favor, descreva seu perfil com pelo menos 50 caracteres');
             return;
         }
-
-        if (!apiKey || !apiKey.startsWith('sk-ant-')) {
-            setError('Por favor, insira uma chave de API válida da Anthropic');
+        if (!apiKey || apiKey.length < 20) {
+            setError('Por favor, insira uma chave de API válida do Gemini');
             return;
         }
 
@@ -331,7 +330,7 @@ export default function Dashboard() {
                                 <div className={`${styles.alert} ${styles.alertYellow}`}>
                                     <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconYellow}`} />
                                     <div style={{ fontSize: '0.875rem', color: '#92400e' }}>
-                                        <strong>Importante:</strong> Sua chave API da Anthropic é necessária para análise com IA.
+                                        <strong>Importante:</strong> Sua chave API do Gemini é necessária para análise com IA.
                                         Ela é processada de forma segura e nunca armazenada em nossos servidores.
                                     </div>
                                 </div>
@@ -346,7 +345,7 @@ export default function Dashboard() {
                                 />
                                 <p className={styles.inputHint}>
                                     Não tem uma chave?{' '}
-                                    <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className={styles.link}>
+                                    <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" rel="noopener noreferrer" className={styles.link}>
                                         Obtenha aqui gratuitamente
                                     </a>
                                 </p>
@@ -431,7 +430,7 @@ export default function Dashboard() {
                         <div className={styles.content}>
                             <div className={styles.header}>
                                 <h1 className={styles.pageTitle}>Chave API</h1>
-                                <p className={styles.pageDesc}>Gerencie sua chave de API da Anthropic</p>
+                                <p className={styles.pageDesc}>Gerencie sua chave de API do Gemini</p>
                             </div>
 
                             <div className={styles.card}>
@@ -445,7 +444,7 @@ export default function Dashboard() {
 
                                 <form onSubmit={handleApiKeySubmit}>
                                     <div className={styles.formGroup}>
-                                        <label htmlFor="apikey" className={styles.label}>Chave API da Anthropic</label>
+                                        <label htmlFor="apikey" className={styles.label}>Chave API do Gemini</label>
                                         <input
                                             id="apikey"
                                             type="password"
@@ -469,8 +468,8 @@ export default function Dashboard() {
                                     <ol className={styles.infoList}>
                                         <li>
                                             Acesse{' '}
-                                            <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className={styles.link}>
-                                                console.anthropic.com
+                                            <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" rel="noopener noreferrer" className={styles.link}>
+                                                ai.google.dev/gemini-api
                                             </a>
                                         </li>
                                         <li>Faça login ou crie uma conta (é gratuito)</li>
