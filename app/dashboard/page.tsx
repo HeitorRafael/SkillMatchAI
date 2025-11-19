@@ -345,7 +345,7 @@ export default function Dashboard() {
                                 />
                                 <p className={styles.inputHint}>
                                     Não tem uma chave?{' '}
-                                    <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" rel="noopener noreferrer" className={styles.link}>
+                                    <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer" className={styles.link}>
                                         Obtenha aqui gratuitamente
                                     </a>
                                 </p>
@@ -468,8 +468,8 @@ export default function Dashboard() {
                                     <ol className={styles.infoList}>
                                         <li>
                                             Acesse{' '}
-                                            <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" rel="noopener noreferrer" className={styles.link}>
-                                                ai.google.dev/gemini-api
+                                            <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer" className={styles.link}>
+                                                aistudio.google.com/app/api-keys
                                             </a>
                                         </li>
                                         <li>Faça login ou crie uma conta (é gratuito)</li>
