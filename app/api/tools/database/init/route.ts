@@ -2,16 +2,18 @@ import { NextResponse } from 'next/server';
 import { Pool } from 'pg';
 
 /**
- * Endpoint para criar tabelas diretamente via SQL
- * Executa o schema SQL sem depender do Prisma
- * GET /api/init/sql
+ * Database Initialization Tool
+ * Cria o schema completo do banco de dados
+ * 
+ * ⚠️ APENAS USE NA PRIMEIRA INSTALAÇÃO OU QUANDO NECESSÁRIO RESETAR
+ * 
+ * GET /api/tools/database/init
  */
 export async function GET() {
   let client;
   try {
-    console.log('[SQL INIT] Starting SQL-based database initialization...');
+    console.log('[DB INIT] Starting database initialization...');
 
-    // Conectar ao banco usando a connection string
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       ssl: {
@@ -20,11 +22,11 @@ export async function GET() {
     });
 
     client = await pool.connect();
-    console.log('[SQL INIT] Connected to database');
+    console.log('[DB INIT] Connected to database');
 
     // Executar o schema SQL completo
     const schemaSql = `
-      -- Drop existing tables if they exist (for reset)
+      -- Drop existing tables if they exist (para reset completo)
       DROP TABLE IF EXISTS "user_jobs" CASCADE;
       DROP TABLE IF EXISTS "jobs" CASCADE;
       DROP TABLE IF EXISTS "analyses" CASCADE;
@@ -149,9 +151,9 @@ export async function GET() {
       CREATE INDEX "idx_user_jobs_jobId" ON "user_jobs"("jobId");
     `;
 
-    console.log('[SQL INIT] Executing schema SQL...');
+    console.log('[DB INIT] Executing schema SQL...');
     await client.query(schemaSql);
-    console.log('[SQL INIT] Schema created successfully');
+    console.log('[DB INIT] Schema created successfully');
 
     client.release();
     await pool.end();
@@ -160,18 +162,18 @@ export async function GET() {
       {
         status: 'SUCCESS',
         message: 'Database schema created successfully',
-        nextStep: 'Call GET /api/init/setup to create admin user',
+        nextStep: 'Tables created. Run setup to create admin user.',
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('[SQL INIT] Error:', error.message);
+    console.error('[DB INIT] Error:', error.message);
 
     if (client) {
       try {
         client.release();
       } catch (e) {
-        console.error('[SQL INIT] Error releasing client:', e);
+        console.error('[DB INIT] Error releasing client:', e);
       }
     }
 
@@ -180,7 +182,6 @@ export async function GET() {
         status: 'ERROR',
         message: 'Failed to create database schema',
         error: error.message,
-        hint: 'Make sure DATABASE_URL is set correctly in Vercel',
       },
       { status: 500 }
     );
