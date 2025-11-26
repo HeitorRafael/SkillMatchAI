@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview - Seção de Doadores Melhorada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f9fafb;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        /* Layout do Sidebar */
+        .sidebar-preview {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Seção de Doação */
+        .donation-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+            border: 2px solid #fecaca;
+            border-radius: 0.75rem;
+            border-left: 4px solid #ef4444;
+        }
+
+        .donation-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .heart-icon {
+            font-size: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .donation-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #991b1b;
+        }
+
+        .donation-description {
+            font-size: 0.875rem;
+            color: #7f1d1d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 1.25rem;
+            background: #fed7d7;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 1px solid #fcb5b5;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 65%;
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 9999px;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: #7f1d1d;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 0.875rem;
+            border-radius: 0.5rem;
+            border: 1px solid #fecaca;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #dc2626;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #7f1d1d;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        .donate-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            transition: all 0.3s;
+        }
+
+        .donate-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        }
+
+        /* Seção de Doadores */
+        .donors-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #fecaca;
+        }
+
+        .donors-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #991b1b;
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+
+        .donors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .donor-card {
+            background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+            border: 1px solid #fecaca;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .donor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .donor-card:hover {
+            border-color: #fcb5b5;
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .donor-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .donor-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            min-width: 2.5rem;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.125rem;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        .donor-info {
+            flex: 1;
+        }
+
+        .donor-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #991b1b;
+        }
+
+        .donor-amount {
+            font-size: 0.85rem;
+            color: #dc2626;
+            font-weight: 600;
+            margin-top: 0.125rem;
+        }
+
+        .donor-badge {
+            background: white;
+            color: #dc2626;
+            padding: 0.375rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1.5px solid #fecaca;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .donor-message {
+            font-size: 0.8rem;
+            color: #7f1d1d;
+            font-style: italic;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.5rem;
+            border-left: 3px solid #ef4444;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+        }
+
+        .section-divider {
+            margin: 3rem 0;
+            border: 0;
+            border-top: 2px dashed #e5e7eb;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .comparison-item h3 {
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .before {
+            padding: 1.5rem;
+            background: #fee2e2;
+            border-radius: 0.75rem;
+            border: 1px solid #fca5a5;
+        }
+
+        .after {
+            padding: 1.5rem;
+            background: #dcfce7;
+            border-radius: 0.75rem;
+            border: 1px solid #86efac;
+        }
+
+        .before h3::before {
+            content: '❌ ';
+        }
+
+        .after h3::before {
+            content: '✅ ';
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        li::before {
+            content: '• ';
+            color: #6b7280;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-preview {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .donors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.25rem;
+            }
+        }
+
+        .features {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .features h3 {
+            color: #166534;
+            margin-bottom: 1rem;
+        }
+
+        .features li {
+            color: #166534;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎨 Preview - Seção de Doadores Melhorada</h1>
+        <p class="subtitle">Dashboard do SkillMatchAI com novo layout de doadores</p>
+
+        <!-- Preview Principal -->
+        <div class="sidebar-preview">
+            <div class="sidebar">
+                <div class="donation-section">
+                    <div class="donation-header">
+                        <span class="heart-icon">❤️</span>
+                        <span class="donation-title">Ajude o Desenvolvimento</span>
+                    </div>
+
+                    <p class="donation-description">
+                        O desenvolvimento desse aplicativo custou <strong>R$ 100.00</strong> e ainda faltam
+                        <strong>R$ 35.00</strong> para fazer o <strong>desenvolvedor feliz</strong> ficar no zero a
+                        zero.
+                    </p>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span>R$ 65.00 de R$ 100.00</span>
+                            <span
+                                style="background: linear-gradient(135deg, #fecaca, #fed7d7); padding: 0.35rem 0.65rem; border-radius: 0.35rem; font-weight: 700; color: #dc2626;">65%</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Doadores</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Doações</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">5.42</div>
+                            <div class="stat-label">Média</div>
+                        </div>
+                    </div>
+
+                    <button class="donate-button">❤️ Fazer uma Doação</button>
+
+                    <!-- NOVA SEÇÃO DE DOADORES -->
+                    <div class="donors-section">
+                        <h3 class="donors-title">❤️ Nossos Doadores</h3>
+                        <div class="donors-grid">
+                            <!-- Card 1 -->
+                            <div class="donor-card">
+                                <div class="donor-header">
+                                    <div class="donor-avatar">J</div>
+                                    <div class="donor-info">
+                                        <div class="donor-name">João Silva</div>
+                                        <div class="donor-amount">R$ 50.00</div>
+                                    </div>
+                                    <div class="donor-badge">5x</div>
+                                </div>
+                                <div class="donor-message">"Aplicação incrível! Parabéns pelo trabalho!"</div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="donor-card">
+                                <div class="donor-header">
+                                    <div class="donor-avatar">M</div>
+                                    <div class="donor-info">
+                                        <div class="donor-name">Maria Santos</div>
+                                        <div class="donor-amount">R$ 75.00</div>
+                                    </div>
+                                    <div class="donor-badge">3x</div>
+                                </div>
+                                <div class="donor-message">"Muito bom, consegui meu emprego por aqui! 🎉"</div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div class="donor-card">
+                                <div class="donor-header">
+                                    <div class="donor-avatar">P</div>
+                                    <div class="donor-info">
+                                        <div class="donor-name">Pedro Costa</div>
+                                        <div class="donor-amount">R$ 100.00</div>
+                                    </div>
+                                    <div class="donor-badge">8x</div>
+                                </div>
+                                <div class="donor-message">"Excelente ferramenta, recomendo!"</div>
+                            </div>
+
+                            <!-- Card 4 -->
+                            <div class="donor-card">
+                                <div class="donor-header">
+                                    <div class="donor-avatar">A</div>
+                                    <div class="donor-info">
+                                        <div class="donor-name">Ana Oliveira</div>
+                                        <div class="donor-amount">R$ 30.00</div>
+                                    </div>
+                                    <div class="donor-badge">2x</div>
+                                </div>
+                                <div class="donor-message">"Muito útil mesmo, parabéns!"</div>
+                            </div>
+
+                            <!-- Card 5 -->
+                            <div class="donor-card">
+                                <div class="donor-header">
+                                    <div class="donor-avatar">C</div>
+                                    <div class="donor-info">
+                                        <div class="donor-name">Carlos Mendes</div>
+                                        <div class="donor-amount">R$ 25.00</div>
+                                    </div>
+                                    <div class="donor-badge">1x</div>
+                                </div>
+                                <div class="donor-message">"Apoiando o desenvolvimento!"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Comparação Antes vs Depois -->
+        <h2 style="text-align: center; margin: 3rem 0 2rem; color: #111827;">Antes vs Depois</h2>
+        <div class="comparison">
+            <div class="comparison-item">
+                <h3>Layout Anterior</h3>
+                <ul>
+                    <li>3 cards lado a lado (Doadores, Doações, Média)</li>
+                    <li>Card "Doadores" mostra apenas número</li>
+                    <li>Nenhuma informação sobre quem doou</li>
+                    <li>Sem integração visual com doadores reais</li>
+                    <li>Layout pode ficar desalinhado em alguns tamanhos</li>
+                </ul>
+            </div>
+            <div class="comparison-item">
+                <h3>Layout Novo</h3>
+                <ul>
+                    <li>3 cards de stats + seção dedicada de doadores</li>
+                    <li>Cards individuais por doador com nome e valor</li>
+                    <li>Espaço para mensagem/comentário do doador</li>
+                    <li>Reconhecimento visual dos contribuidores</li>
+                    <li>Grid responsiva que funciona em todas as resoluções</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>✨ Destaques da Implementação</h3>
+            <ul>
+                <li><strong>Responsivo:</strong> Adapta-se perfeitamente em mobile, tablet e desktop</li>
+                <li><strong>Paleta de cores:</strong> Mantém consistência visual com o projeto</li>
+                <li><strong>Interativo:</strong> Efeitos hover suaves nos cards</li>
+                <li><strong>Acessível:</strong> Tipografia legível, cores com bom contraste</li>
+                <li><strong>Escalável:</strong> Fácil integrar com dados reais da API</li>
+                <li><strong>Modular:</strong> Componente separado e reutilizável</li>
+            </ul>
+        </div>
+
+        <div
+            style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.75rem; padding: 1.5rem; margin: 2rem 0;">
+            <h3 style="color: #1e40af; margin-bottom: 1rem;">📋 Próximas Etapas</h3>
+            <ul style="color: #1e40af;">
+                <li><strong>API Integration:</strong> Substituir dados de mock por dados reais do banco de dados</li>
+                <li><strong>Loading State:</strong> Adicionar skeleton ou spinner enquanto carrega</li>
+                <li><strong>Paginação:</strong> Se houver muitos doadores, implementar paginação</li>
+                <li><strong>Animações:</strong> Adicionar animação ao aparecer novos doadores</li>
+                <li><strong>Testes:</strong> Validar em diferentes navegadores e dispositivos</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

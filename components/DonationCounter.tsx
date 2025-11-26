@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Heart, TrendingUp } from 'lucide-react';
 import DonationModal from './DonationModal';
+import DonorsList from './DonorsList';
 import styles from './DonationCounter.module.css';
 
 interface DonationStats {
@@ -132,6 +133,9 @@ export default function DonationCounter() {
 
             {/* Donation Modal */}
             <DonationModal isOpen={showModal} onClose={() => setShowModal(false)} onDonate={fetchStats} />
+
+            {/* Donors List */}
+            <DonorsList />
         </>
     );
 }

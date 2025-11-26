@@ -62,7 +62,7 @@
 }
 
 .sidebar {
-    width: 16rem;
+    width: 20rem;
     background: var(--white);
     border-right: 1px solid var(--gray-200);
     height: calc(100vh - 4rem);
@@ -186,7 +186,7 @@
 }
 
 .main {
-    margin-left: 16rem;
+    margin-left: 20rem;
     flex: 1;
     padding: 2rem;
 }
@@ -363,6 +363,16 @@
     border: 1px solid var(--yellow-200);
 }
 
+.alertGreen {
+    background: var(--green-50);
+    border: 1px solid var(--green-200);
+}
+
+.alertRed {
+    background: var(--red-50);
+    border: 1px solid var(--red-200);
+}
+
 .alertBlue {
     background: var(--blue-50);
     border: 1px solid var(--blue-200);
@@ -375,6 +385,10 @@
 
 .alertIconYellow {
     color: var(--yellow-600);
+}
+
+.alertIconGreen {
+    color: var(--green-600);
 }
 
 .alertIconBlue {
@@ -412,6 +426,51 @@
     font-size: 0.75rem;
     color: var(--gray-500);
     margin-top: 0.5rem;
+}
+
+.form {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.submitButton {
+    padding: 0.75rem 1.5rem;
+    background: var(--black);
+    color: var(--white);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.submitButton:hover:not(:disabled) {
+    background: var(--gray-800);
+}
+
+.submitButton:disabled {
+    background: var(--gray-400);
+    cursor: not-allowed;
+}
+
+.deleteButton {
+    padding: 0.75rem 1.5rem;
+    background: var(--red-600);
+    color: var(--white);
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.deleteButton:hover:not(:disabled) {
+    background: var(--red-700);
+}
+
+.deleteButton:disabled {
+    background: var(--gray-400);
+    cursor: not-allowed;
 }
 
 .link {

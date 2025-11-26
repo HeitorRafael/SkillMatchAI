@@ -11,7 +11,8 @@ Write-Host ""
 Write-Host "1. Inicializando banco (criando admin)..." -ForegroundColor Yellow
 try {
     $initResponse = Invoke-WebRequest -Uri "$BASE_URL/api/init/complete" -Method GET
-} catch {
+}
+catch {
     $initResponse = $_.Exception.Response
 }
 Write-Host "Status: $($initResponse.StatusCode)" -ForegroundColor Green
@@ -23,7 +24,7 @@ Write-Host ""
 # 2. Testar login com admin
 Write-Host "2. Testando login com admin..." -ForegroundColor Yellow
 $loginBody = @{
-    email = "heitorbdelfino@gmail.com"
+    email    = "heitorbdelfino@gmail.com"
     password = "senha123"
 } | ConvertTo-Json
 
@@ -32,7 +33,8 @@ try {
         -Method POST `
         -ContentType "application/json" `
         -Body $loginBody
-} catch {
+}
+catch {
     $loginResponse = $_.Exception.Response
 }
 
@@ -46,8 +48,8 @@ Write-Host ""
 Write-Host "3. Testando registro de novo usuario..." -ForegroundColor Yellow
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 $registerBody = @{
-    name = "Usuario Teste"
-    email = "teste_$timestamp@example.com"
+    name     = "Usuario Teste"
+    email    = "teste_$timestamp@example.com"
     password = "SenhaForte123!"
 } | ConvertTo-Json
 
@@ -56,7 +58,8 @@ try {
         -Method POST `
         -ContentType "application/json" `
         -Body $registerBody
-} catch {
+}
+catch {
     $registerResponse = $_.Exception.Response
 }
 
@@ -73,7 +76,7 @@ if ($registerResponse.StatusCode -eq 201) {
     # 4. Testar login com novo usuario
     Write-Host "4. Testando login com novo usuario..." -ForegroundColor Yellow
     $newLoginBody = @{
-        email = $newUserEmail
+        email    = $newUserEmail
         password = "SenhaForte123!"
     } | ConvertTo-Json
 
@@ -82,7 +85,8 @@ if ($registerResponse.StatusCode -eq 201) {
             -Method POST `
             -ContentType "application/json" `
             -Body $newLoginBody
-    } catch {
+    }
+    catch {
         $newLoginResponse = $_.Exception.Response
     }
 

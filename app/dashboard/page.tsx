@@ -25,16 +25,43 @@ export default function Dashboard() {
     const [activeSection, setActiveSection] = useState<Section>('upload');
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const [description, setDescription] = useState('');
-    const [apiKey, setApiKey] = useState('');
+    const [apiKey, setApiKey] = useState(''); // Chave temporária para análise rápida
     const [analyzing, setAnalyzing] = useState(false);
     const [error, setError] = useState<string>('');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const [hasSavedApiKey, setHasSavedApiKey] = useState(false);
+    const [loadingApiKey, setLoadingApiKey] = useState(true);
+    const [savingApiKey, setSavingApiKey] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [tempApiKeyForModal, setTempApiKeyForModal] = useState(''); // Chave para salvar via modal
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/');
         }
     }, [status, router]);
+
+    // Carregar status da chave API ao montar componente
+    useEffect(() => {
+        if (session?.user?.email) {
+            fetchApiKeyStatus();
+        }
+    }, [session?.user?.email]);
+
+    const fetchApiKeyStatus = async () => {
+        try {
+            setLoadingApiKey(true);
+            const res = await fetch('/api/user/api-key');
+            const data = await res.json();
+            if (data.success) {
+                setHasSavedApiKey(data.hasSavedKey);
+            }
+        } catch (err) {
+            console.error('Erro ao verificar chave API:', err);
+        } finally {
+            setLoadingApiKey(false);
+        }
+    };
 
     if (status === 'loading') {
         return <div className={styles.container}>Carregando...</div>;
@@ -62,8 +89,10 @@ export default function Dashboard() {
             setError('Por favor, descreva seu perfil com pelo menos 50 caracteres');
             return;
         }
-        if (!apiKey || apiKey.length < 20) {
-            setError('Por favor, insira uma chave de API válida do Gemini');
+
+        // Verificar se há chave salva ou chave digitada para análise rápida
+        if (!hasSavedApiKey && (!apiKey || apiKey.length < 20)) {
+            setError('Por favor, insira sua chave API do Gemini ou salve uma chave permanente na seção "Chave API"');
             return;
         }
 
@@ -71,16 +100,19 @@ export default function Dashboard() {
         setError('');
 
         try {
+            // Usar chave salva ou a digitada
+            const keyToUse = hasSavedApiKey ? 'SAVED' : apiKey;
+
             // Criar FormData
             const formData = new FormData();
             formData.append('resume', resumeFile);
             formData.append('description', description);
-            formData.append('apiKey', apiKey);
+            formData.append('apiKey', keyToUse);
 
             // Salvar dados na sessão/localStorage para serem processados na página de jobs
             localStorage.setItem('resumeData', JSON.stringify({
                 description,
-                apiKey
+                apiKey: keyToUse
             }));
             localStorage.setItem('analysisInProgress', 'true');
 
@@ -99,9 +131,72 @@ export default function Dashboard() {
         alert('Perfil atualizado com sucesso!');
     };
 
-    const handleApiKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleApiKeySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        alert('Chave API salva com segurança!');
+        
+        if (!tempApiKeyForModal || tempApiKeyForModal.length < 20) {
+            setError('Por favor, insira uma chave API válida (mínimo 20 caracteres)');
+            return;
+        }
+
+        setSavingApiKey(true);
+        setError('');
+        setSuccessMessage('');
+
+        try {
+            const res = await fetch('/api/user/api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apiKey: tempApiKeyForModal }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setSuccessMessage('✅ Chave API salva com segurança!');
+                setHasSavedApiKey(true);
+                setTempApiKeyForModal('');
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                setError(data.error || 'Erro ao salvar chave API');
+            }
+        } catch (err) {
+            setError('Erro ao salvar chave API');
+            console.error(err);
+        } finally {
+            setSavingApiKey(false);
+        }
+    };
+
+    const handleRemoveApiKey = async () => {
+        if (!confirm('Tem certeza que deseja remover sua chave API salva?')) {
+            return;
+        }
+
+        setSavingApiKey(true);
+        setError('');
+        setSuccessMessage('');
+
+        try {
+            const res = await fetch('/api/user/api-key', {
+                method: 'DELETE',
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setSuccessMessage('✅ Chave API removida com sucesso!');
+                setHasSavedApiKey(false);
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                setError(data.error || 'Erro ao remover chave API');
+            }
+        } catch (err) {
+            setError('Erro ao remover chave API');
+            console.error(err);
+        } finally {
+            setSavingApiKey(false);
+        }
     };
 
     return (
@@ -192,7 +287,7 @@ export default function Dashboard() {
                             <p className={styles.planLabel}>Plano Atual</p>
                             <p className={styles.planName}>Gratuito</p>
                             <p className={styles.planUsage}>1/1 análise esta semana</p>
-                            <button 
+                            <button
                                 onClick={() => setShowSubscriptionModal(true)}
                                 className={styles.upgradeButton}
                             >
@@ -317,23 +412,15 @@ export default function Dashboard() {
                                 <p className={styles.charCount}>{description.length}/1000 caracteres</p>
                             </div>
 
-                            {/* API Key Card */}
+                            {/* API Key Input - Simples e Temporário */}
                             <div className={styles.card}>
                                 <div className={styles.cardHeader}>
                                     <div className={styles.cardIcon}>
                                         <Key size={20} />
                                     </div>
                                     <div>
-                                        <h2 className={styles.cardTitle}>3. Chave da API</h2>
-                                        <p className={styles.cardSubtitle}>Sua chave será criptografada e armazenada com segurança</p>
-                                    </div>
-                                </div>
-
-                                <div className={`${styles.alert} ${styles.alertYellow}`}>
-                                    <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconYellow}`} />
-                                    <div style={{ fontSize: '0.875rem', color: '#92400e' }}>
-                                        <strong>Importante:</strong> Sua chave API do Gemini é necessária para análise com IA.
-                                        Ela é processada de forma segura e nunca armazenada em nossos servidores.
+                                        <h2 className={styles.cardTitle}>3. Chave da API (Opcional)</h2>
+                                        <p className={styles.cardSubtitle}>Coloque sua chave para análise imediata</p>
                                     </div>
                                 </div>
 
@@ -346,9 +433,9 @@ export default function Dashboard() {
                                     disabled={analyzing}
                                 />
                                 <p className={styles.inputHint}>
-                                    Não tem uma chave?{' '}
+                                    Se não colocar aqui, use a chave salva na seção "Chave API" da barra lateral.{' '}
                                     <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer" className={styles.link}>
-                                        Obtenha aqui gratuitamente
+                                        Obtenha sua chave gratuitamente
                                     </a>
                                 </p>
                             </div>
@@ -356,7 +443,7 @@ export default function Dashboard() {
                             {/* Analyze Button */}
                             <button
                                 onClick={handleAnalysis}
-                                disabled={!resumeFile || !description || !apiKey || analyzing}
+                                disabled={!resumeFile || !description || (!hasSavedApiKey && !apiKey) || analyzing}
                                 className={styles.analyzeButton}
                             >
                                 {analyzing ? (
@@ -427,66 +514,105 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {/* API Key Section */}
+                    {/* API Key Section - Modal Style */}
                     {activeSection === 'api' && (
                         <div className={styles.content}>
                             <div className={styles.header}>
-                                <h1 className={styles.pageTitle}>Chave API</h1>
-                                <p className={styles.pageDesc}>Gerencie sua chave de API do Gemini</p>
+                                <h1 className={styles.pageTitle}>Chave API do Gemini</h1>
+                                <p className={styles.pageDesc}>Salve sua chave para usar em todas as análises</p>
                             </div>
 
-                            <div className={styles.card}>
-                                <div className={`${styles.alert} ${styles.alertBlue}`}>
-                                    <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconBlue}`} />
-                                    <div style={{ fontSize: '0.875rem', color: '#1e40af' }}>
-                                        <strong>Segurança:</strong> Sua chave nunca é armazenada em nossos servidores.
-                                        Ela é usada apenas durante a análise e descartada em seguida.
+                            {hasSavedApiKey ? (
+                                // Estado: Chave salva
+                                <div className={styles.card}>
+                                    <div className={`${styles.alert} ${styles.alertGreen}`}>
+                                        <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconGreen}`} />
+                                        <div style={{ fontSize: '0.875rem', color: '#15803d' }}>
+                                            <strong>✅ Chave API Ativa</strong> - Sua chave está salva e será usada automaticamente nas análises.
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.5rem' }}>
+                                        <p style={{ fontSize: '0.875rem', color: '#166534', marginBottom: '0.5rem' }}>
+                                            <strong>Status:</strong> Chave salva com segurança
+                                        </p>
+                                        <p style={{ fontSize: '0.75rem', color: '#15803d' }}>
+                                            Sua chave foi criptografada e armazenada no banco de dados. Ela será usada automaticamente em toda análise de currículo.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={handleRemoveApiKey}
+                                        disabled={savingApiKey}
+                                        style={{ marginTop: '1.5rem', width: '100%' }}
+                                        className={styles.deleteButton}
+                                    >
+                                        {savingApiKey ? 'Removendo...' : '🗑️ Remover Chave Salva'}
+                                    </button>
+
+                                    {error && <div className={`${styles.alert} ${styles.alertRed}`} style={{ marginTop: '1rem' }}>{error}</div>}
+                                    {successMessage && <div className={`${styles.alert} ${styles.alertGreen}`} style={{ marginTop: '1rem' }}>{successMessage}</div>}
+                                </div>
+                            ) : (
+                                // Estado: Nenhuma chave salva
+                                <div className={styles.card}>
+                                    <div className={`${styles.alert} ${styles.alertYellow}`}>
+                                        <AlertCircle size={20} className={`${styles.alertIcon} ${styles.alertIconYellow}`} />
+                                        <div style={{ fontSize: '0.875rem', color: '#92400e' }}>
+                                            <strong>Nenhuma chave salva</strong> - Você pode colocar uma chave temporária em "Upload & Análise" ou salvar uma aqui para usar sempre.
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleApiKeySubmit} style={{ marginTop: '1.5rem' }}>
+                                        <div className={styles.formGroup}>
+                                            <label htmlFor="apikey-modal" className={styles.label}>Sua Chave API do Gemini</label>
+                                            <input
+                                                id="apikey-modal"
+                                                type="password"
+                                                value={tempApiKeyForModal}
+                                                onChange={(e) => setTempApiKeyForModal(e.target.value)}
+                                                placeholder="sk-ant-api03-xxxxxxxxxxxxxxxxxxxx"
+                                                className={styles.input}
+                                                disabled={savingApiKey}
+                                            />
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={savingApiKey || !tempApiKeyForModal}
+                                            className={styles.saveButton}
+                                            style={{ width: '100%' }}
+                                        >
+                                            {savingApiKey ? 'Salvando...' : '💾 Salvar Chave com Segurança'}
+                                        </button>
+                                    </form>
+
+                                    {error && <div className={`${styles.alert} ${styles.alertRed}`} style={{ marginTop: '1rem' }}>{error}</div>}
+                                    {successMessage && <div className={`${styles.alert} ${styles.alertGreen}`} style={{ marginTop: '1rem' }}>{successMessage}</div>}
+
+                                    <div className={styles.infoBox}>
+                                        <p className={styles.infoTitle}>📋 Como obter sua chave API:</p>
+                                        <ol className={styles.infoList}>
+                                            <li>
+                                                Acesse{' '}
+                                                <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer" className={styles.link}>
+                                                    aistudio.google.com/app/api-keys
+                                                </a>
+                                            </li>
+                                            <li>Faça login ou crie uma conta (gratuita)</li>
+                                            <li>Vá em "API Keys" e gere uma nova chave</li>
+                                            <li>Copie e cole aqui</li>
+                                        </ol>
                                     </div>
                                 </div>
-
-                                <form onSubmit={handleApiKeySubmit}>
-                                    <div className={styles.formGroup}>
-                                        <label htmlFor="apikey" className={styles.label}>Chave API do Gemini</label>
-                                        <input
-                                            id="apikey"
-                                            type="password"
-                                            placeholder="sk-ant-api03-xxxxxxxxxxxxxxxxxxxx"
-                                            className={styles.input}
-                                        />
-                                    </div>
-
-                                    <div className={styles.buttonGroup}>
-                                        <button type="submit" className={styles.saveButton} style={{ flex: 1 }}>
-                                            Salvar Chave
-                                        </button>
-                                        <button type="button" className={styles.buttonSecondary}>
-                                            Remover
-                                        </button>
-                                    </div>
-                                </form>
-
-                                <div className={styles.infoBox}>
-                                    <p className={styles.infoTitle}>Como obter sua chave API:</p>
-                                    <ol className={styles.infoList}>
-                                        <li>
-                                            Acesse{' '}
-                                            <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer" className={styles.link}>
-                                                aistudio.google.com/app/api-keys
-                                            </a>
-                                        </li>
-                                        <li>Faça login ou crie uma conta (é gratuito)</li>
-                                        <li>Vá em &quot;API Keys&quot; e gere uma nova chave</li>
-                                        <li>Copie e cole aqui</li>
-                                    </ol>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     )}
                 </main>
             </div>
 
             {/* Subscription Modal */}
-            <SubscriptionModal 
+            <SubscriptionModal
                 isOpen={showSubscriptionModal}
                 onClose={() => setShowSubscriptionModal(false)}
             />
